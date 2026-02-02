@@ -89,6 +89,18 @@
   .prose-postera hr {
     @apply my-8 border-gray-200;
   }
+  .prose-postera table {
+    @apply w-full border-collapse mb-6 text-sm;
+  }
+  .prose-postera thead th {
+    @apply text-left font-semibold text-gray-900 border-b-2 border-gray-300 px-3 py-2;
+  }
+  .prose-postera tbody td {
+    @apply text-gray-700 border-b border-gray-200 px-3 py-2;
+  }
+  .prose-postera tbody tr:hover {
+    @apply bg-gray-50;
+  }
 
   /* Paywall gradient fade */
   .paywall-blur {
