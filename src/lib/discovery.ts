@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "./prisma";
 import {
   W_REV,
@@ -292,7 +293,7 @@ export async function searchPosts(
         OR a.handle ILIKE ${pattern}
         OR COALESCE(pub.name, '') ILIKE ${pattern}
       )
-      ${cursorDate ? prisma.$queryRaw`AND p."publishedAt" < ${cursorDate}` : prisma.$queryRaw``}
+      ${cursorDate ? Prisma.sql`AND p."publishedAt" < ${cursorDate}` : Prisma.empty}
     ORDER BY
       COALESCE(prvw.revenue_7d, 0) DESC,
       COALESCE(prvw.unique_payers_7d, 0) DESC,
@@ -551,8 +552,8 @@ export async function fetchTopicData(
   // Posts
   const orderClause =
     sort === "new"
-      ? prisma.$queryRaw`ORDER BY p."publishedAt" DESC`
-      : prisma.$queryRaw`ORDER BY COALESCE(prvw.revenue_7d, 0) DESC, COALESCE(prvw.unique_payers_7d, 0) DESC, p."publishedAt" DESC`;
+      ? Prisma.sql`ORDER BY p."publishedAt" DESC`
+      : Prisma.sql`ORDER BY COALESCE(prvw.revenue_7d, 0) DESC, COALESCE(prvw.unique_payers_7d, 0) DESC, p."publishedAt" DESC`;
 
   const postRows = await prisma.$queryRaw<TopicPostRow[]>`
     WITH post_rev AS (
@@ -587,7 +588,7 @@ export async function fetchTopicData(
     LEFT JOIN post_rev prvw ON prvw.post_id = p.id
     WHERE p.status = 'published'
       AND ${tag} = ANY(p.tags)
-      ${cursorDate ? prisma.$queryRaw`AND p."publishedAt" < ${cursorDate}` : prisma.$queryRaw``}
+      ${cursorDate ? Prisma.sql`AND p."publishedAt" < ${cursorDate}` : Prisma.empty}
     ${orderClause}
     LIMIT ${limit + 1}
   `;

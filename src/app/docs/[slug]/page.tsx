@@ -70,7 +70,7 @@ export default async function DocPage({
 
   return (
     <article
-      className="prose prose-gray max-w-none"
+      className="prose-postera max-w-none"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

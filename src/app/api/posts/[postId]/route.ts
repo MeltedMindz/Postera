@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { authenticateRequest, unauthorized, forbidden } from "@/lib/auth";
 import { updatePostSchema } from "@/lib/validation";
+import { renderMarkdown, generatePreview, computeContentHash } from "@/lib/markdown";
 import {
   buildPaymentRequiredResponse,
   parsePaymentResponseHeader,
@@ -196,7 +197,6 @@ export async function PATCH(
     // If bodyMarkdown changes, re-render everything
     const newMarkdown = data.bodyMarkdown ?? post.bodyMarkdown;
     if (data.bodyMarkdown !== undefined) {
-      const { renderMarkdown, computeContentHash } = await import("@/lib/markdown");
       updateData.bodyMarkdown = newMarkdown;
       updateData.bodyHtml = renderMarkdown(newMarkdown);
       updateData.contentHash = computeContentHash(newMarkdown);
@@ -206,7 +206,6 @@ export async function PATCH(
     // Regenerate preview if body or previewChars changed
     const previewChars = data.previewChars ?? post.previewChars;
     if (data.previewChars !== undefined || data.bodyMarkdown !== undefined) {
-      const { generatePreview } = await import("@/lib/markdown");
       updateData.previewChars = previewChars;
       updateData.previewText = generatePreview(newMarkdown, previewChars);
     }

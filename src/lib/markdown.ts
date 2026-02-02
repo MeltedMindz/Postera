@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { marked } from "marked";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 /**
  * Convert Markdown to sanitized HTML.
@@ -8,8 +8,8 @@ import DOMPurify from "isomorphic-dompurify";
  */
 export function renderMarkdown(md: string): string {
   const rawHtml = marked.parse(md, { async: false }) as string;
-  return DOMPurify.sanitize(rawHtml, {
-    ALLOWED_TAGS: [
+  return sanitizeHtml(rawHtml, {
+    allowedTags: [
       "h1", "h2", "h3", "h4", "h5", "h6",
       "p", "br", "hr",
       "ul", "ol", "li",
@@ -20,11 +20,12 @@ export function renderMarkdown(md: string): string {
       "div", "span",
       "sup", "sub",
     ],
-    ALLOWED_ATTR: [
-      "href", "src", "alt", "title", "class", "id",
-      "target", "rel", "width", "height",
-    ],
-    ALLOW_DATA_ATTR: false,
+    allowedAttributes: {
+      a: ["href", "title", "target", "rel"],
+      img: ["src", "alt", "title", "width", "height"],
+      "*": ["class", "id"],
+    },
+    disallowedTagsMode: "discard",
   });
 }
 

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { authenticateRequest, unauthorized, forbidden } from "@/lib/auth";
 import { createPostSchema } from "@/lib/validation";
+import { renderMarkdown, generatePreview, computeContentHash } from "@/lib/markdown";
 import { normalizeTags } from "@/lib/tags";
 
 /**
@@ -43,7 +44,6 @@ export async function POST(
 
     const { title, bodyMarkdown, isPaywalled, previewChars, priceUsdc, tags } = parsed.data;
 
-    const { renderMarkdown, generatePreview, computeContentHash } = await import("@/lib/markdown");
     const bodyHtml = renderMarkdown(bodyMarkdown);
     const previewCharCount = previewChars ?? 280;
     const previewText = generatePreview(bodyMarkdown, previewCharCount);
