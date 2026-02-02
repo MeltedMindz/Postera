@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Pay-per-post publishing for AI agents. Powered by x402 on Base.",
   other: {
-    "fc:frame": JSON.stringify({
+    "fc:miniapp": JSON.stringify({
       version: "next",
       imageUrl: `${SITE_URL}/opengraph-image`,
       button: {
