@@ -34,6 +34,9 @@ function usdcToUnits(amount: string): bigint {
 interface SponsorButtonProps {
   postId: string;
   postTitle: string;
+  totalEarned: number;
+  sponsorEarned: number;
+  uniqueSponsors: number;
 }
 
 const PRESET_AMOUNTS = ["0.25", "0.50", "1.00"];
@@ -49,7 +52,13 @@ type SponsorStep =
   | "success"
   | "error";
 
-export default function SponsorButton({ postId, postTitle }: SponsorButtonProps) {
+export default function SponsorButton({
+  postId,
+  postTitle,
+  totalEarned,
+  sponsorEarned,
+  uniqueSponsors,
+}: SponsorButtonProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [custom, setCustom] = useState("");
   const [step, setStep] = useState<SponsorStep>("select");
@@ -114,13 +123,11 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
     if (!amount || parseFloat(amount) <= 0) return;
     setErrorMsg("");
 
-    // Check wallet connected
     if (!isConnected) {
       setStep("not_connected");
       return;
     }
 
-    // Check chain
     if (chainId !== BASE_CHAIN_ID) {
       setStep("wrong_chain");
       return;
@@ -137,16 +144,15 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
 
       if (res.status === 402) {
         const data = await res.json();
-        const req = data.paymentRequirements?.[0];
-        if (req?.recipient) {
-          setRecipient(req.recipient);
-          sendPayment(amount, req.recipient);
+        const reqs = data.paymentRequirements;
+        if (reqs?.recipient) {
+          setRecipient(reqs.recipient);
+          sendPayment(amount, reqs.recipient);
         } else {
           setErrorMsg("Could not determine payment recipient.");
           setStep("error");
         }
       } else if (res.ok) {
-        // Shouldn't happen without payment proof, but handle it
         setStep("success");
       } else {
         const data = await res.json().catch(() => ({ error: "Unknown error" }));
@@ -203,6 +209,8 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
     resetWrite();
   }
 
+  const fmtUsdc = (n: number) => (n > 0 ? `$${n.toFixed(2)}` : "$0.00");
+
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   if (step === "success") {
@@ -225,23 +233,40 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
     );
   }
 
+  const isSelectState =
+    step === "select" || step === "not_connected" || step === "wrong_chain" || step === "error";
+
   return (
     <div className="mt-8 p-6 border border-gray-200 rounded-lg">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">
-        Sponsor this post
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-700">Sponsor this post</h3>
+        {/* Earnings tally */}
+        <div className="text-right">
+          <p className="text-sm font-medium text-gray-900">{fmtUsdc(totalEarned)} earned</p>
+          {sponsorEarned > 0 && (
+            <p className="text-xs text-gray-500">
+              {fmtUsdc(sponsorEarned)} from {uniqueSponsors} sponsor
+              {uniqueSponsors !== 1 ? "s" : ""}
+            </p>
+          )}
+        </div>
+      </div>
       <p className="text-xs text-gray-500 mb-4">
-        Support this free content. 90% goes to the author, 10% to the protocol.
+        Support this free content with a direct payment to the author.
       </p>
 
-      {/* Amount selection — shown in select/not_connected/wrong_chain/error states */}
-      {(step === "select" || step === "not_connected" || step === "wrong_chain" || step === "error") && (
+      {/* Amount selection */}
+      {isSelectState && (
         <>
           <div className="flex flex-wrap gap-2 mb-4">
             {PRESET_AMOUNTS.map((amt) => (
               <button
                 key={amt}
-                onClick={() => { setSelected(amt); setCustom(""); if (step !== "select") setStep("select"); }}
+                onClick={() => {
+                  setSelected(amt);
+                  setCustom("");
+                  if (step !== "select") setStep("select");
+                }}
                 className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
                   selected === amt
                     ? "bg-indigo-600 text-white border-indigo-600"
@@ -252,7 +277,10 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
               </button>
             ))}
             <button
-              onClick={() => { setSelected("custom"); if (step !== "select") setStep("select"); }}
+              onClick={() => {
+                setSelected("custom");
+                if (step !== "select") setStep("select");
+              }}
               className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
                 selected === "custom"
                   ? "bg-indigo-600 text-white border-indigo-600"
@@ -361,10 +389,7 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
       {step === "error" && (
         <div className="mt-3">
           <p className="text-xs text-red-600 mb-2">{errorMsg}</p>
-          <button
-            onClick={handleRetry}
-            className="text-xs text-indigo-600 hover:underline"
-          >
+          <button onClick={handleRetry} className="text-xs text-indigo-600 hover:underline">
             Try again
           </button>
         </div>
@@ -376,11 +401,7 @@ export default function SponsorButton({ postId, postTitle }: SponsorButtonProps)
 function Spinner() {
   return (
     <div className="inline-block">
-      <svg
-        className="w-5 h-5 text-indigo-600 animate-spin"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
+      <svg className="w-5 h-5 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
         <circle
           className="opacity-25"
           cx="12"

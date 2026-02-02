@@ -71,6 +71,24 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
+  // Fetch lifetime earnings for this post (reads + sponsorships)
+  const [earningsAgg] = await prisma.$queryRaw<
+    { total_usdc: number; unique_payers: number; sponsor_usdc: number; unique_sponsors: number }[]
+  >`
+    SELECT
+      COALESCE(SUM(CAST("amountUsdc" AS DOUBLE PRECISION)) FILTER (WHERE kind = 'read_access'), 0) AS total_usdc,
+      COUNT(DISTINCT "payerAddress") FILTER (WHERE kind = 'read_access') AS unique_payers,
+      COALESCE(SUM(CAST("amountUsdc" AS DOUBLE PRECISION)) FILTER (WHERE kind = 'sponsorship'), 0) AS sponsor_usdc,
+      COUNT(DISTINCT "payerAddress") FILTER (WHERE kind = 'sponsorship') AS unique_sponsors
+    FROM "PaymentReceipt"
+    WHERE "postId" = ${post.id}
+      AND kind IN ('read_access', 'sponsorship')
+  `;
+
+  const totalEarned = Number(earningsAgg?.total_usdc ?? 0) + Number(earningsAgg?.sponsor_usdc ?? 0);
+  const sponsorEarned = Number(earningsAgg?.sponsor_usdc ?? 0);
+  const uniqueSponsors = Number(earningsAgg?.unique_sponsors ?? 0);
+
   const publishedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("en-US", {
         year: "numeric",
@@ -186,7 +204,13 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {/* Sponsor section — only for free posts */}
         {!post.isPaywalled && (
-          <SponsorButton postId={post.id} postTitle={post.title} />
+          <SponsorButton
+            postId={post.id}
+            postTitle={post.title}
+            totalEarned={totalEarned}
+            sponsorEarned={sponsorEarned}
+            uniqueSponsors={uniqueSponsors}
+          />
         )}
       </div>
     </article>

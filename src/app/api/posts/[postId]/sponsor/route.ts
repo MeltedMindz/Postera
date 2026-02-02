@@ -25,12 +25,44 @@ const SPONSOR_SPLIT_BPS_AUTHOR = 9000; // 90%
 const SPONSOR_SPLIT_BPS_PROTOCOL = 1000; // 10%
 
 /**
+ * Compute the 90/10 split amounts in USDC micro-units (6 decimals).
+ * Returns string amounts that sum exactly to the total.
+ */
+function computeSplit(totalUsdc: string) {
+  const totalMicro = parseUsdcMicro(totalUsdc);
+  const authorMicro = (totalMicro * BigInt(SPONSOR_SPLIT_BPS_AUTHOR)) / BigInt(10000);
+  const protocolMicro = totalMicro - authorMicro; // remainder goes to protocol
+  return {
+    authorUsdc: formatMicro(authorMicro),
+    protocolUsdc: formatMicro(protocolMicro),
+  };
+}
+
+function parseUsdcMicro(amount: string): bigint {
+  const parts = amount.split(".");
+  const whole = BigInt(parts[0]) * BigInt(10 ** 6);
+  if (parts[1]) {
+    const decimals = parts[1].padEnd(6, "0").slice(0, 6);
+    return whole + BigInt(decimals);
+  }
+  return whole;
+}
+
+function formatMicro(micro: bigint): string {
+  const whole = micro / BigInt(10 ** 6);
+  const frac = micro % BigInt(10 ** 6);
+  const fracStr = frac.toString().padStart(6, "0").replace(/0+$/, "");
+  if (!fracStr) return whole.toString();
+  return `${whole}.${fracStr}`;
+}
+
+/**
  * POST /api/posts/[postId]/sponsor
  *
  * Sponsor a FREE post via x402.
  * - Only allowed on non-paywalled posts
- * - Returns 402 if no payment proof
- * - Records receipt with 90/10 split on payment
+ * - Returns 402 with two payment requirements (90% author, 10% protocol)
+ * - Records receipt on payment proof
  */
 export async function POST(
   req: NextRequest,
@@ -77,27 +109,31 @@ export async function POST(
     }
 
     const { amountUsdc } = parsed.data;
-    const payoutAddress = post.publication?.payoutAddress ?? PLATFORM_TREASURY;
+    const authorPayoutAddress = post.publication?.payoutAddress ?? PLATFORM_TREASURY;
+
+    if (!PLATFORM_TREASURY) {
+      return Response.json(
+        { error: "Platform treasury not configured" },
+        { status: 503 }
+      );
+    }
 
     // Check for x402 payment proof
     const paymentInfo = parsePaymentResponseHeader(req);
 
     if (!paymentInfo) {
-      // Return 402 Payment Required
-      const paymentRequirements = [
-        {
-          scheme: "exact" as const,
-          network: "base",
-          chainId: BASE_CHAIN_ID,
-          asset: USDC_CONTRACT_BASE,
-          amount: amountUsdc,
-          recipient: payoutAddress,
-          description: `Sponsor post: "${post.title}"`,
-          mimeType: "application/json",
-          resourceUrl: `/api/posts/${post.id}/sponsor`,
-          maxTimeoutSeconds: 300,
-        },
-      ];
+      // Return 402 — single transfer to author, protocol fee is ledger accounting
+      const paymentRequirements = {
+        scheme: "exact" as const,
+        network: "base",
+        chainId: BASE_CHAIN_ID,
+        asset: USDC_CONTRACT_BASE,
+        amount: amountUsdc,
+        recipient: authorPayoutAddress,
+        description: `Sponsor post: "${post.title}"`,
+        resourceUrl: `/api/posts/${post.id}/sponsor`,
+        maxTimeoutSeconds: 300,
+      };
 
       return Response.json(
         { error: "Payment Required", paymentRequirements },
@@ -111,9 +147,7 @@ export async function POST(
     }
 
     // Payment proof provided — record receipt
-    const total = parseFloat(amountUsdc);
-    const authorAmount = (total * SPONSOR_SPLIT_BPS_AUTHOR) / 10000;
-    const protocolAmount = (total * SPONSOR_SPLIT_BPS_PROTOCOL) / 10000;
+    const { authorUsdc, protocolUsdc } = computeSplit(amountUsdc);
 
     const receipt = await prisma.paymentReceipt.create({
       data: {
@@ -125,7 +159,7 @@ export async function POST(
         amountUsdc,
         chain: "base",
         txRef: paymentInfo.txRef,
-        recipientAuthor: payoutAddress,
+        recipientAuthor: authorPayoutAddress,
         recipientProtocol: PLATFORM_TREASURY,
         splitBpsAuthor: SPONSOR_SPLIT_BPS_AUTHOR,
         splitBpsProtocol: SPONSOR_SPLIT_BPS_PROTOCOL,
@@ -155,8 +189,8 @@ export async function POST(
           txRef: receipt.txRef,
           createdAt: receipt.createdAt,
           split: {
-            authorAmount: authorAmount.toFixed(2),
-            protocolAmount: protocolAmount.toFixed(2),
+            authorAmount: authorUsdc,
+            protocolAmount: protocolUsdc,
             bpsAuthor: SPONSOR_SPLIT_BPS_AUTHOR,
             bpsProtocol: SPONSOR_SPLIT_BPS_PROTOCOL,
           },
