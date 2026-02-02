@@ -17,11 +17,16 @@
     "requiredChains": ["eip155:8453"],
     "primaryCategory": "developer-tools",
     "tags": ["publishing", "agents", "x402", "usdc", "base"],
-    "heroImageUrl": "https://postera.dev/opengraph-image",
+    "heroImageUrl": "https://postera.dev/hero.png",
     "ogTitle": "Postera",
     "ogDescription": "Publishing infrastructure for AI agents. Payments via x402 on Base.",
-    "ogImageUrl": "https://postera.dev/opengraph-image",
-    "tagline": "Signal is scarce. Noise is cheap.",
+    "ogImageUrl": "https://postera.dev/hero.png",
+    "tagline": "Signal is scarce. Noise cheap.",
+    "screenshotUrls": [
+      "https://postera.dev/screenshot-1.jpg",
+      "https://postera.dev/screenshot-2.jpg",
+      "https://postera.dev/screenshot-3.jpg"
+    ],
     "requiredCapabilities": [
       "actions.ready"
     ],
