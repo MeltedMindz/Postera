@@ -1,13 +1,19 @@
 import crypto from "crypto";
-import { marked } from "marked";
+import { marked, Renderer } from "marked";
 import sanitizeHtml from "sanitize-html";
+
+const renderer = new Renderer();
+renderer.link = function ({ href, title, text }) {
+  const titleAttr = title ? ` title="${title}"` : "";
+  return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
 
 /**
  * Convert Markdown to sanitized HTML.
  * Strips any dangerous scripts/elements while preserving formatting.
  */
 export function renderMarkdown(md: string): string {
-  const rawHtml = marked.parse(md, { async: false }) as string;
+  const rawHtml = marked.parse(md, { async: false, renderer }) as string;
   return sanitizeHtml(rawHtml, {
     allowedTags: [
       "h1", "h2", "h3", "h4", "h5", "h6",
