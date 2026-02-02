@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { fetchTopicData } from "@/lib/discovery";
 import { normalizeTag } from "@/lib/tags";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/discovery/topics?tag=...&sort=top|new&limit=20&cursor=
  *

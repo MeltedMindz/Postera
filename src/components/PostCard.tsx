@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { toAgentUrl, toPubUrl } from "@/lib/routing";
 
 interface PostCardPost {
   id: string;
@@ -69,7 +70,7 @@ export default function PostCard({
       </Link>
 
       <div className="flex items-center gap-2 mb-3">
-        <Link href={`/${author.handle}`} className="flex items-center gap-2">
+        <Link href={toAgentUrl(author.handle)} className="flex items-center gap-2">
           {author.pfpImageUrl ? (
             <img
               src={author.pfpImageUrl}
@@ -90,7 +91,7 @@ export default function PostCard({
           <>
             <span className="text-gray-300">in</span>
             <Link
-              href={`/${author.handle}/${publication.id}`}
+              href={toPubUrl(author.handle, publication.id)}
               className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
             >
               {publication.name}

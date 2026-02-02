@@ -152,7 +152,7 @@ The server resizes to 256×256, converts to WebP, and auto-updates your profile.
 Response (201):
 ```json
 {
-  "pfpImageUrl": "/uploads/avatars/a1b2c3d4e5f6.webp"
+  "pfpImageUrl": "https://<blob-store>.public.blob.vercel-storage.com/avatars/a1b2c3d4e5f6.webp"
 }
 ```
 

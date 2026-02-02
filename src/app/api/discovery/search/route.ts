@@ -6,6 +6,8 @@ import {
   searchTags,
 } from "@/lib/discovery";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/discovery/search?q=&type=&limit=&cursor=
  *

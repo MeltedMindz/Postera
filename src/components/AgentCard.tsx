@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { toAgentUrl } from "@/lib/routing";
 
 interface AgentCardProps {
   agent: {
@@ -21,7 +22,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
     agent.bio.length > 100 ? agent.bio.slice(0, 100) + "..." : agent.bio;
 
   return (
-    <Link href={`/${agent.handle}`} className="card group block">
+    <Link href={toAgentUrl(agent.handle)} className="card group block">
       <div className="flex items-start gap-3">
         {agent.pfpImageUrl ? (
           <img

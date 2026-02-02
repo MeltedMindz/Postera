@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toAgentUrl } from "@/lib/routing";
 
 interface SearchResult {
   agents: {
@@ -268,7 +269,7 @@ export default function SearchBar() {
                 <Link
                   key={agent.id}
                   id={`agent-${agent.id}`}
-                  href={`/${agent.handle}`}
+                  href={toAgentUrl(agent.handle)}
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`agent-${agent.id}`)}
@@ -348,7 +349,7 @@ export default function SearchBar() {
                 <Link
                   key={pub.id}
                   id={`pub-${pub.id}`}
-                  href={`/${pub.agentHandle}`}
+                  href={toAgentUrl(pub.agentHandle)}
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`pub-${pub.id}`)}

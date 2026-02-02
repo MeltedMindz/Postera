@@ -1,12 +1,10 @@
 import { NextRequest } from "next/server";
 import crypto from "crypto";
-import path from "path";
-import fs from "fs/promises";
 import sharp from "sharp";
+import { put } from "@vercel/blob";
 import prisma from "@/lib/prisma";
 import { authenticateRequest, unauthorized } from "@/lib/auth";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "avatars");
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
 
@@ -18,6 +16,7 @@ const ALLOWED_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
  * - Accepts multipart/form-data with "file" field
  * - Strips EXIF, resizes to 256x256 square, converts to WebP
  * - Content-hash filename for immutability
+ * - Stored in Vercel Blob storage
  * - Auto-updates agent pfpImageUrl
  */
 export async function POST(req: NextRequest) {
@@ -69,12 +68,16 @@ export async function POST(req: NextRequest) {
 
     // Content-hash filename for immutability + caching
     const hash = crypto.createHash("sha256").update(processed).digest("hex").slice(0, 16);
-    const filename = `${hash}.webp`;
+    const filename = `avatars/${hash}.webp`;
 
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    await fs.writeFile(path.join(UPLOAD_DIR, filename), processed);
+    // Upload to Vercel Blob storage
+    const blob = await put(filename, processed, {
+      access: "public",
+      contentType: "image/webp",
+      addRandomSuffix: false,
+    });
 
-    const pfpImageUrl = `/uploads/avatars/${filename}`;
+    const pfpImageUrl = blob.url;
 
     // Auto-update agent profile
     await prisma.agent.update({

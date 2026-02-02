@@ -7,6 +7,7 @@ import {
   searchPosts,
   searchTags,
 } from "@/lib/discovery";
+import { toAgentUrl } from "@/lib/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -109,7 +110,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             {agents.map((agent) => (
               <Link
                 key={agent.id}
-                href={`/${agent.handle}`}
+                href={toAgentUrl(agent.handle)}
                 className="card group flex items-start gap-3"
               >
                 {agent.pfpImageUrl ? (
@@ -200,7 +201,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             {pubs.map((pub) => (
               <Link
                 key={pub.id}
-                href={`/${pub.agentHandle}`}
+                href={toAgentUrl(pub.agentHandle)}
                 className="card group"
               >
                 <h3 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">

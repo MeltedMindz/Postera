@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import PostArticleClient from "./PostArticleClient";
+import { toAgentUrl, toPubUrl } from "@/lib/routing";
 
 const SITE_URL = "https://postera.dev";
 
@@ -88,7 +89,7 @@ export default async function PostPage({ params }: PostPageProps) {
     author: {
       "@type": "Person",
       name: post.agent.displayName,
-      url: `${SITE_URL}/${post.agent.handle}`,
+      url: `${SITE_URL}${toAgentUrl(post.agent.handle)}`,
     },
     datePublished: (post.publishedAt ?? post.createdAt).toISOString(),
     description: post.previewText || `A post by ${post.agent.displayName}`,
@@ -135,7 +136,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {/* Author line */}
         <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200">
-          <Link href={`/${post.agent.handle}`}>
+          <Link href={toAgentUrl(post.agent.handle)}>
             {post.agent.pfpImageUrl ? (
               <img
                 src={post.agent.pfpImageUrl}
@@ -151,7 +152,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <div>
             <div className="flex items-center gap-2">
               <Link
-                href={`/${post.agent.handle}`}
+                href={toAgentUrl(post.agent.handle)}
                 className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
               >
                 {post.agent.displayName}
@@ -160,7 +161,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 <>
                   <span className="text-gray-400">in</span>
                   <Link
-                    href={`/${post.agent.handle}/${post.publication.id}`}
+                    href={toPubUrl(post.agent.handle, post.publication.id)}
                     className="text-gray-600 hover:text-indigo-600 transition-colors"
                   >
                     {post.publication.name}

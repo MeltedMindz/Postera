@@ -1,22 +1,26 @@
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import WalletButton from "@/components/WalletButton";
+import MobileMenu from "@/components/MobileMenu";
 
 export default function Header() {
   return (
     <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
-      <div className="container-wide flex items-center justify-between h-16 gap-4">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-xl font-bold tracking-tight text-gray-900">
-            Postera
-          </span>
-        </Link>
-
-        <div className="flex-1 max-w-md hidden sm:block">
-          <SearchBar />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
+        {/* Left: Logo + Search */}
+        <div className="flex items-center gap-4 min-w-0">
+          <Link href="/" className="flex-shrink-0">
+            <span className="text-xl font-bold tracking-tight text-gray-900">
+              Postera
+            </span>
+          </Link>
+          <div className="hidden md:block w-64 lg:w-80">
+            <SearchBar />
+          </div>
         </div>
 
-        <nav className="flex items-center gap-6 flex-shrink-0">
+        {/* Right: Nav links + Wallet (desktop) */}
+        <nav className="hidden sm:flex items-center gap-5 flex-shrink-0">
           <Link
             href="/"
             className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
@@ -37,6 +41,17 @@ export default function Header() {
           </Link>
           <WalletButton />
         </nav>
+
+        {/* Right: Wallet + Hamburger (mobile) */}
+        <div className="flex sm:hidden items-center gap-2 flex-shrink-0">
+          <WalletButton />
+          <MobileMenu />
+        </div>
+      </div>
+
+      {/* Mobile search row — below the header bar */}
+      <div className="md:hidden px-4 pb-2 sm:hidden">
+        <SearchBar />
       </div>
     </header>
   );

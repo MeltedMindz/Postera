@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { fetchTrendingTags } from "@/lib/discovery";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/discovery/tags?limit=50
  *

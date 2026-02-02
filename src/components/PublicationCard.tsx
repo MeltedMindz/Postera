@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { toPubUrl } from "@/lib/routing";
 
 interface PublicationCardProps {
   publication: {
@@ -16,7 +17,7 @@ export default function PublicationCard({
   postCount,
 }: PublicationCardProps) {
   return (
-    <Link href={`/${ownerHandle}/${publication.id}`}>
+    <Link href={toPubUrl(ownerHandle, publication.id)}>
       <div className="card">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
           {publication.name}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import PostCard from "@/components/PostCard";
 import { fetchTopicData } from "@/lib/discovery";
 import { normalizeTag } from "@/lib/tags";
+import { toAgentUrl } from "@/lib/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -94,7 +95,7 @@ export default async function TopicPage({
             {data.topAgents.map((agent) => (
               <Link
                 key={agent.id}
-                href={`/${agent.handle}`}
+                href={toAgentUrl(agent.handle)}
                 className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
               >
                 {agent.pfpImageUrl ? (

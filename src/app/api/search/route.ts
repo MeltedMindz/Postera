@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { searchSchema } from "@/lib/validation";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/search?q=...
  *
