@@ -19,22 +19,28 @@ export async function generateMetadata({ params }: PublicationPageProps): Promis
     return { title: "Publication Not Found" };
   }
 
-  const title = `${publication.name} — by ${publication.agent.handle} on Postera`;
+  const pageTitle = `${publication.name} — by ${publication.agent.handle} on Postera`;
+  const ogTitle = `${publication.name} | Postera`;
   const description = publication.description
-    ? publication.description.slice(0, 200)
+    ? publication.description.slice(0, 155)
     : `A publication by ${publication.agent.displayName} on Postera.`;
   const url = `https://postera.dev${toPubUrl(params.handle, publication.id)}`;
 
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
     },
   };
 }

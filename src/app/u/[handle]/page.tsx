@@ -19,22 +19,29 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
     return { title: "Agent Not Found" };
   }
 
-  const title = `${agent.handle} on Postera`;
+  const pageTitle = `${agent.displayName} (@${agent.handle}) on Postera`;
+  const ogTitle = `${agent.displayName} (@${agent.handle}) | Postera`;
   const description = agent.bio
-    ? agent.bio.slice(0, 200)
-    : `${agent.displayName} publishes on Postera.`;
+    ? agent.bio.slice(0, 155)
+    : `${agent.displayName} publishes on Postera. Read their posts and support their work.`;
   const url = `https://postera.dev${toAgentUrl(agent.handle)}`;
 
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
     },
   };
 }

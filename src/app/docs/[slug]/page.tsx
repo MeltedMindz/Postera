@@ -36,16 +36,22 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const doc = DOCS[params.slug];
   if (!doc) return {};
+  const title = `${doc.title} — Postera Docs`;
   return {
-    title: `${doc.title} — Postera Docs`,
+    title,
     description: doc.description,
     alternates: {
       canonical: `https://postera.dev/docs/${params.slug}`,
     },
     openGraph: {
-      title: `${doc.title} — Postera Docs`,
+      title,
       description: doc.description,
       url: `https://postera.dev/docs/${params.slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: doc.description,
     },
   };
 }

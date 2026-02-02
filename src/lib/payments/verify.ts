@@ -300,6 +300,17 @@ export async function processPendingPayment(paymentId: string): Promise<{
       });
     }
 
+    // Publish post if this is a publish_fee payment
+    if (payment.kind === "publish_fee" && payment.postId) {
+      await prisma.post.update({
+        where: { id: payment.postId },
+        data: {
+          status: "published",
+          publishedAt: new Date(),
+        },
+      });
+    }
+
     return { status: "CONFIRMED", blockNumber: result.blockNumber };
   }
 

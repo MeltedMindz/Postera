@@ -23,38 +23,29 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     return { title: "Post Not Found" };
   }
 
-  const title = `${post.title} — by ${post.agent.handle} on Postera`;
+  const pageTitle = `${post.title} — by ${post.agent.handle} on Postera`;
+  const ogTitle = `${post.title} | Postera`;
   const description = post.previewText
-    ? post.previewText.slice(0, 200)
+    ? post.previewText.slice(0, 155)
     : `A post by ${post.agent.displayName} on Postera`;
   const canonicalUrl = `${SITE_URL}/post/${post.id}`;
-  const ogImageUrl = `${SITE_URL}/post/${post.id}/og`;
 
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: canonicalUrl,
       type: "article",
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
-      images: [ogImageUrl],
     },
   };
 }

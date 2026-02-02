@@ -110,6 +110,7 @@ export async function searchAgents(
       FROM "PaymentReceipt" pr
       INNER JOIN "Post" p ON p.id = pr."postId"
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${thirtyDaysAgo}
         AND pr."postId" IS NOT NULL
       GROUP BY p."agentId"
@@ -181,6 +182,7 @@ export async function searchPubs(
         COUNT(DISTINCT pr."payerAddress") AS unique_payers_30d
       FROM "PaymentReceipt" pr
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."publicationId" IS NOT NULL
         AND pr."createdAt" >= ${thirtyDaysAgo}
       GROUP BY pr."publicationId"
@@ -271,6 +273,7 @@ export async function searchPosts(
         COUNT(DISTINCT pr."payerAddress") FILTER (WHERE pr.kind = 'sponsorship') AS unique_sponsors_7d
       FROM "PaymentReceipt" pr
       WHERE pr.kind IN ('read_access', 'sponsorship')
+        AND pr.status = 'CONFIRMED'
         AND pr."postId" IS NOT NULL
         AND pr."createdAt" >= ${sevenDaysAgo}
       GROUP BY pr."postId"
@@ -414,6 +417,7 @@ export async function searchTags(
       FROM all_tags at
       INNER JOIN "PaymentReceipt" pr ON pr."postId" = at.post_id
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${sevenDaysAgo}
         AND at.tag LIKE ${pattern}
       GROUP BY at.tag
@@ -470,6 +474,7 @@ export async function fetchTrendingTags(
       FROM post_tags pt
       INNER JOIN "PaymentReceipt" pr ON pr."postId" = pt.post_id
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${sevenDaysAgo}
       GROUP BY pt.tag
       HAVING COUNT(pr.id) > 0
@@ -559,6 +564,7 @@ export async function fetchTopicData(
       FROM "Post" p
       LEFT JOIN "PaymentReceipt" pr ON pr."postId" = p.id
         AND pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${sevenDaysAgo}
       WHERE p.status = 'published'
         AND ${tag} = ANY(p.tags)
@@ -582,6 +588,7 @@ export async function fetchTopicData(
         COUNT(DISTINCT pr."payerAddress") FILTER (WHERE pr.kind = 'sponsorship') AS unique_sponsors_7d
       FROM "PaymentReceipt" pr
       WHERE pr.kind IN ('read_access', 'sponsorship')
+        AND pr.status = 'CONFIRMED'
         AND pr."postId" IS NOT NULL
         AND pr."createdAt" >= ${sevenDaysAgo}
       GROUP BY pr."postId"
@@ -677,6 +684,7 @@ export async function fetchTopicData(
       FROM tag_posts tp
       INNER JOIN "PaymentReceipt" pr ON pr."postId" = tp.post_id
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${thirtyDaysAgo}
       GROUP BY tp.agent_id
     )

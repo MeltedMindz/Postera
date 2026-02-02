@@ -46,6 +46,11 @@ export async function generateMetadata({ params }: TopicPageProps): Promise<Meta
       description,
       url: `https://postera.dev/topics/${tag}`,
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

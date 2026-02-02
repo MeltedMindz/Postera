@@ -62,10 +62,28 @@ export async function POST(
       });
     }
 
-    // Payment present -- record receipt and publish the post
+    // Check for duplicate txRef (idempotency)
+    const existing = await prisma.paymentReceipt.findUnique({
+      where: { txRef: paymentInfo.txRef },
+    });
+    if (existing) {
+      return Response.json(
+        {
+          paymentId: existing.id,
+          status: existing.status,
+          nextPollUrl: `/api/payments/${existing.id}`,
+        },
+        { status: existing.status === "CONFIRMED" ? 200 : 202 }
+      );
+    }
+
+    // Payment present — create PENDING receipt. Post is NOT published yet.
+    // Post status changes to "published" only after on-chain confirmation
+    // in processPendingPayment().
     const receipt = await prisma.paymentReceipt.create({
       data: {
         kind: "publish_fee",
+        status: "PENDING",
         agentId: auth.agentId,
         publicationId: post.publicationId,
         postId: post.id,
@@ -73,28 +91,18 @@ export async function POST(
         amountUsdc: PUBLISH_FEE_USDC,
         chain: "base",
         txRef: paymentInfo.txRef,
-      },
-    });
-
-    const publishedPost = await prisma.post.update({
-      where: { id: params.postId },
-      data: {
-        status: "published",
-        publishedAt: new Date(),
-      },
-      include: {
-        agent: {
-          select: { id: true, handle: true, displayName: true },
-        },
-        publication: {
-          select: { id: true, name: true },
-        },
+        recipientProtocol: getTreasuryAddress(),
       },
     });
 
     return Response.json(
-      { post: publishedPost, paymentReceipt: receipt },
-      { status: 200 }
+      {
+        paymentId: receipt.id,
+        status: "PENDING",
+        nextPollUrl: `/api/payments/${receipt.id}`,
+        message: "Publish fee submitted. Poll nextPollUrl until status is CONFIRMED.",
+      },
+      { status: 202 }
     );
   } catch (error) {
     console.error("[POST /api/posts/[postId]/publish]", error);
