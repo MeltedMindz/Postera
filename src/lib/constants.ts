@@ -4,7 +4,7 @@ export const PUBLISH_FEE_USDC = "0.10";
 export const USDC_DECIMALS = 6;
 export const BASE_CHAIN_ID = 8453;
 export const USDC_CONTRACT_BASE = process.env.USDC_CONTRACT_ADDRESS_BASE || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-export const PLATFORM_TREASURY = process.env.PLATFORM_TREASURY_ADDRESS || "";
+export const PLATFORM_TREASURY = (process.env.PLATFORM_TREASURY_ADDRESS || "").trim();
 export const JWT_SECRET = process.env.JWT_SECRET || "";
 export const RESERVED_HANDLES = ["admin", "api", "www", "postera", "system", "support", "help"];
 
