@@ -7,6 +7,7 @@ import {
   USDC_CONTRACT_BASE,
   POSTERA_SPLITTER_ADDRESS,
   ERC20_TRANSFER_TOPIC,
+  SPLITTER_SPONSOR_TOPIC,
 } from "@/lib/constants";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -121,13 +122,14 @@ export async function verifyDirectTransfer(
 
 /**
  * Verify a splitter contract payment (90/10 split).
- * Checks that the tx called the splitter and USDC was transferred to author + protocol.
+ * Uses the Sponsor event emitted by the splitter contract to verify amounts,
+ * since the splitter has its own fee recipient address for the protocol share.
  */
 export async function verifySplitterPayment(
   txHash: string,
   expectedPayer: string,
   expectedAuthor: string,
-  expectedProtocol: string,
+  _expectedProtocol: string,
   expectedTotalUsdc: string,
 ): Promise<VerificationResult> {
   const provider = getProvider();
@@ -143,53 +145,53 @@ export async function verifySplitterPayment(
     if (confirmations < MIN_CONFIRMATIONS) return { status: "PENDING" };
 
     // Verify tx was sent to splitter contract
-    if (
-      POSTERA_SPLITTER_ADDRESS &&
-      receipt.to?.toLowerCase() !== POSTERA_SPLITTER_ADDRESS.toLowerCase()
-    ) {
-      // Could be a batch tx or different path — check Transfer logs instead
+    const splitterAddr = POSTERA_SPLITTER_ADDRESS.toLowerCase();
+    if (splitterAddr && receipt.to?.toLowerCase() !== splitterAddr) {
+      return {
+        status: "FAILED",
+        reason: `Transaction was not sent to the splitter contract (sent to ${receipt.to})`,
+      };
     }
 
-    // Parse USDC Transfer logs and verify the split happened
-    const transfers = parseTransferLogs(receipt.logs);
+    // Parse the Sponsor event from the splitter contract
+    const sponsorEvent = parseSponsorEvent(receipt.logs);
     const expectedTotal = parseUsdcToUnits(expectedTotalUsdc);
-    const expectedAuthorAmount = (expectedTotal * BigInt(9000)) / BigInt(10000);
-    // Allow 1 unit tolerance for rounding
-    const tolerance = BigInt(1);
+    const tolerance = BigInt(2); // rounding tolerance
 
+    if (sponsorEvent) {
+      // Verify payer and author match
+      if (sponsorEvent.payer.toLowerCase() !== expectedPayer.toLowerCase()) {
+        return { status: "FAILED", reason: `Sponsor event payer mismatch: expected ${expectedPayer}, got ${sponsorEvent.payer}` };
+      }
+      if (sponsorEvent.author.toLowerCase() !== expectedAuthor.toLowerCase()) {
+        return { status: "FAILED", reason: `Sponsor event author mismatch: expected ${expectedAuthor}, got ${sponsorEvent.author}` };
+      }
+      // Verify total amount
+      if (sponsorEvent.totalAmount < expectedTotal - tolerance) {
+        return { status: "FAILED", reason: `Insufficient amount: expected ${expectedTotalUsdc} USDC, got ${formatUnitsToUsdc(sponsorEvent.totalAmount)}` };
+      }
+      return { status: "CONFIRMED", blockNumber: receipt.blockNumber };
+    }
+
+    // Fallback: check USDC Transfer logs (in case splitter doesn't emit Sponsor event)
+    const transfers = parseTransferLogs(receipt.logs);
     const authorTransfer = transfers.find(
       (t) =>
         t.to.toLowerCase() === expectedAuthor.toLowerCase() &&
-        t.value >= expectedAuthorAmount - tolerance
-    );
-
-    const protocolTransfer = transfers.find(
-      (t) =>
-        t.to.toLowerCase() === expectedProtocol.toLowerCase() &&
         t.value > BigInt(0)
     );
 
     if (!authorTransfer) {
-      return {
-        status: "FAILED",
-        reason: `No USDC transfer to author (${expectedAuthor}) found in tx`,
-      };
+      return { status: "FAILED", reason: `No USDC transfer to author (${expectedAuthor}) found in tx` };
     }
 
-    if (!protocolTransfer) {
-      return {
-        status: "FAILED",
-        reason: `No USDC transfer to protocol (${expectedProtocol}) found in tx`,
-      };
-    }
+    // Verify total USDC leaving the payer is approximately correct
+    const totalFromPayer = transfers
+      .filter((t) => t.from.toLowerCase() === expectedPayer.toLowerCase())
+      .reduce((sum, t) => sum + t.value, BigInt(0));
 
-    // Verify total transferred is approximately correct
-    const actualTotal = authorTransfer.value + protocolTransfer.value;
-    if (actualTotal < expectedTotal - tolerance) {
-      return {
-        status: "FAILED",
-        reason: `Insufficient amount: expected ${expectedTotalUsdc} USDC, got ${formatUnitsToUsdc(actualTotal)}`,
-      };
+    if (totalFromPayer < expectedTotal - tolerance) {
+      return { status: "FAILED", reason: `Insufficient total: expected ${expectedTotalUsdc} USDC, payer sent ${formatUnitsToUsdc(totalFromPayer)}` };
     }
 
     return { status: "CONFIRMED", blockNumber: receipt.blockNumber };
@@ -334,6 +336,40 @@ function parseTransferLogs(logs: readonly ethers.Log[]): TransferLog[] {
   }
 
   return transfers;
+}
+
+interface SponsorEvent {
+  payer: string;
+  author: string;
+  totalAmount: bigint;
+  authorAmount: bigint;
+  protocolAmount: bigint;
+}
+
+function parseSponsorEvent(logs: readonly ethers.Log[]): SponsorEvent | null {
+  const splitterAddr = POSTERA_SPLITTER_ADDRESS.toLowerCase();
+
+  for (const log of logs) {
+    if (
+      splitterAddr &&
+      log.address.toLowerCase() === splitterAddr &&
+      log.topics[0] === SPLITTER_SPONSOR_TOPIC &&
+      log.topics.length >= 3
+    ) {
+      // Sponsor(address indexed payer, address indexed author, uint256 total, uint256 authorAmt, uint256 protocolAmt)
+      const payer = ethers.getAddress("0x" + log.topics[1].slice(26));
+      const author = ethers.getAddress("0x" + log.topics[2].slice(26));
+      // data contains three uint256 values (total, authorAmt, protocolAmt)
+      const data = log.data.slice(2); // remove 0x
+      const totalAmount = BigInt("0x" + data.slice(0, 64));
+      const authorAmount = BigInt("0x" + data.slice(64, 128));
+      const protocolAmount = BigInt("0x" + data.slice(128, 192));
+
+      return { payer, author, totalAmount, authorAmount, protocolAmount };
+    }
+  }
+
+  return null;
 }
 
 function parseUsdcToUnits(amount: string): bigint {
