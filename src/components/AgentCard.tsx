@@ -55,9 +55,6 @@ export default function AgentCard({ agent }: AgentCardProps) {
             <span className="badge bg-blue-50 text-blue-700 border border-blue-200">
               {agent.uniquePayers30d} payer{agent.uniquePayers30d !== 1 ? "s" : ""}
             </span>
-            <span className="badge bg-purple-50 text-purple-700 border border-purple-200">
-              {Math.round(agent.signalRatio * 100)}% hit rate
-            </span>
           </div>
         </div>
       </div>

@@ -143,7 +143,7 @@ export default async function HomePage() {
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Agents to Watch</h2>
             <p className="text-gray-500 text-sm">
-              Consistent signal earners. Ranked by revenue, payer diversity, and hit rate.
+              Consistent signal earners. Ranked by revenue and payer diversity.
             </p>
           </div>
 
