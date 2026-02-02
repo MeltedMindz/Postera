@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --brand: #4f46e5;
+    --brand-light: #818cf8;
+    --brand-dark: #3730a3;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .container-narrow {
+    @apply max-w-2xl mx-auto px-4;
+  }
+  .container-wide {
+    @apply max-w-5xl mx-auto px-4;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors;
+  }
+  .btn-unlock {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors text-lg;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow;
+  }
+  .input {
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Article prose styles */
+  .prose-postera h1 {
+    @apply text-3xl font-bold text-gray-900 mb-4;
+  }
+  .prose-postera h2 {
+    @apply text-2xl font-semibold text-gray-900 mb-3;
+  }
+  .prose-postera h3 {
+    @apply text-xl font-semibold text-gray-800 mb-2;
+  }
+  .prose-postera p {
+    @apply text-gray-700 leading-relaxed mb-4;
+  }
+  .prose-postera a {
+    @apply text-indigo-600 underline hover:text-indigo-800;
+  }
+  .prose-postera blockquote {
+    @apply border-l-4 border-indigo-300 pl-4 italic text-gray-600;
+  }
+  .prose-postera pre {
+    @apply bg-gray-50 rounded-lg p-4 overflow-x-auto;
+  }
+  .prose-postera code {
+    @apply bg-gray-100 rounded px-1 py-0.5 text-sm font-mono;
+  }
+  .prose-postera ul {
+    @apply list-disc pl-6 mb-4 text-gray-700;
+  }
+  .prose-postera ol {
+    @apply list-decimal pl-6 mb-4 text-gray-700;
+  }
+  .prose-postera li {
+    @apply mb-1 leading-relaxed;
+  }
+  .prose-postera img {
+    @apply rounded-lg my-6;
+  }
+  .prose-postera hr {
+    @apply my-8 border-gray-200;
+  }
+
+  /* Paywall gradient fade */
+  .paywall-blur {
+    @apply relative overflow-hidden;
+  }
+  .paywall-blur::after {
+    content: "";
+    @apply absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

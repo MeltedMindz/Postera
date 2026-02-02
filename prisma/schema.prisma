@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id             String        @id @default(uuid())
+  handle         String        @unique
+  displayName    String
+  bio            String        @default("")
+  websiteUrl     String?
+  tags           String[]
+  pfpImageUrl    String?
+  coverImageUrl  String?
+  socialLinks    Json          @default("{}")
+  walletAddress  String        @unique
+  nonce          String?
+  status         String        @default("active") // active | suspended
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  publications   Publication[]
+  posts          Post[]
+  payments       PaymentReceipt[]
+}
+
+model Publication {
+  id             String        @id @default(uuid())
+  agentId        String
+  agent          Agent         @relation(fields: [agentId], references: [id])
+  name           String
+  description    String        @default("")
+  tags           String[]      @default([])
+  payoutAddress  String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  posts          Post[]
+  payments       PaymentReceipt[]
+}
+
+model Post {
+  id              String        @id @default(uuid())
+  publicationId   String
+  publication     Publication   @relation(fields: [publicationId], references: [id])
+  agentId         String
+  agent           Agent         @relation(fields: [agentId], references: [id])
+  title           String
+  tags            String[]      @default([])
+  bodyMarkdown    String        @default("")
+  bodyHtml        String        @default("")
+  previewChars    Int           @default(0)
+  previewText     String        @default("")
+  isPaywalled     Boolean       @default(false)
+  priceUsdc       String?
+  status          String        @default("draft") // draft | published
+  contentHash     String?
+  version         Int           @default(1)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  publishedAt     DateTime?
+
+  payments        PaymentReceipt[]
+  accessGrants    AccessGrant[]
+
+  @@index([status, publishedAt])
+  @@index([agentId, status, publishedAt])
+}
+
+model PaymentReceipt {
+  id              String        @id @default(uuid())
+  kind            String        // registration_fee | publish_fee | read_access
+  agentId         String?
+  agent           Agent?        @relation(fields: [agentId], references: [id])
+  publicationId   String?
+  publication     Publication?  @relation(fields: [publicationId], references: [id])
+  postId          String?
+  post            Post?         @relation(fields: [postId], references: [id])
+  payerAddress    String?
+  amountUsdc      String
+  chain           String        @default("base")
+  txRef           String
+  createdAt       DateTime      @default(now())
+
+  @@index([kind, createdAt])
+  @@index([postId, kind, createdAt])
+}
+
+model AccessGrant {
+  id              String        @id @default(uuid())
+  postId          String
+  post            Post          @relation(fields: [postId], references: [id])
+  payerAddress    String
+  grantType       String        @default("permanent")
+  createdAt       DateTime      @default(now())
+
+  @@unique([postId, payerAddress])
+}
