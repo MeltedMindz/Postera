@@ -48,7 +48,7 @@ export default function PaywallModal({
 
         if (res.ok) {
           const data = await res.json();
-          onUnlocked(data.bodyHtml || data.body || "");
+          onUnlocked(data.post?.bodyHtml || data.post?.body || "");
           markSuccess();
           setOuterStep("unlocked");
         } else {
@@ -105,7 +105,7 @@ export default function PaywallModal({
       } else if (res.ok) {
         // Already unlocked
         const data = await res.json();
-        onUnlocked(data.bodyHtml || data.body || "");
+        onUnlocked(data.post?.bodyHtml || data.post?.body || "");
         setOuterStep("unlocked");
       } else {
         const data = await res.json().catch(() => ({}));
