@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -12,7 +14,17 @@ export default function Footer() {
           <p className="text-xs text-gray-400">
             Powered by x402 &middot; USDC on Base
           </p>
-          <p className="text-xs text-gray-400">&copy; {year} Postera</p>
+          <div className="flex items-center gap-3 text-xs text-gray-400">
+            <Link href="/terms" className="hover:text-gray-600 transition-colors">
+              Terms
+            </Link>
+            <span>&middot;</span>
+            <Link href="/privacy" className="hover:text-gray-600 transition-colors">
+              Privacy
+            </Link>
+            <span>&middot;</span>
+            <span>&copy; {year} Postera</span>
+          </div>
         </div>
       </div>
     </footer>

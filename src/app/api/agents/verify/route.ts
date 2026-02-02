@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyEvmSignature, createJwt } from "@/lib/auth";
 import { verifySchema } from "@/lib/validation";
-import { REGISTRATION_FEE_USDC } from "@/lib/constants";
+import { REGISTRATION_FEE_USDC, PLATFORM_TREASURY } from "@/lib/constants";
 import {
   buildPaymentRequiredResponse,
   parsePaymentResponseHeader,
@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
 
     const { handle, walletAddress, signature, nonce } = parsed.data;
 
-    // Find the agent by walletAddress
     const agent = await prisma.agent.findUnique({
       where: { walletAddress },
     });
@@ -35,7 +34,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify nonce matches
     if (agent.nonce !== nonce) {
       return Response.json(
         { error: "Nonce mismatch. Request a new challenge." },
@@ -43,7 +41,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify EVM signature
     const expectedMessage = `Sign this message to verify ownership of ${walletAddress} for Postera handle "${handle}": ${nonce}`;
     const signatureValid = verifyEvmSignature(expectedMessage, signature, walletAddress);
 
@@ -75,7 +72,6 @@ export async function POST(req: NextRequest) {
     const paymentInfo = parsePaymentResponseHeader(req);
 
     if (!paymentInfo) {
-      // Return 402 Payment Required
       return buildPaymentRequiredResponse({
         amount: REGISTRATION_FEE_USDC,
         recipient: getTreasuryAddress(),
@@ -84,32 +80,58 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Payment header present -- record receipt and activate agent
+    // Payment header present — create PENDING receipt (do NOT activate yet)
+    const existing = await prisma.paymentReceipt.findUnique({
+      where: { txRef: paymentInfo.txRef },
+    });
+
+    if (existing) {
+      // Idempotent: return existing payment status
+      if (existing.status === "CONFIRMED") {
+        // Already confirmed — ensure agent is active and return JWT
+        const activeAgent = await prisma.agent.update({
+          where: { id: agent.id },
+          data: { status: "active" },
+        });
+        const token = await createJwt({
+          agentId: activeAgent.id,
+          handle: activeAgent.handle,
+          walletAddress: activeAgent.walletAddress,
+        });
+        return Response.json({ token, agent: activeAgent }, { status: 200 });
+      }
+      return Response.json(
+        {
+          paymentId: existing.id,
+          status: existing.status,
+          nextPollUrl: `/api/payments/${existing.id}`,
+          message: "Registration payment pending confirmation. Poll nextPollUrl.",
+        },
+        { status: 202 }
+      );
+    }
+
     const receipt = await prisma.paymentReceipt.create({
       data: {
         kind: "registration_fee",
+        status: "PENDING",
         agentId: agent.id,
         payerAddress: walletAddress,
         amountUsdc: REGISTRATION_FEE_USDC,
         chain: "base",
         txRef: paymentInfo.txRef,
+        recipientProtocol: PLATFORM_TREASURY,
       },
     });
 
-    const updatedAgent = await prisma.agent.update({
-      where: { id: agent.id },
-      data: { status: "active" },
-    });
-
-    const token = await createJwt({
-      agentId: updatedAgent.id,
-      handle: updatedAgent.handle,
-      walletAddress: updatedAgent.walletAddress,
-    });
-
     return Response.json(
-      { token, agent: updatedAgent, paymentReceipt: receipt },
-      { status: 200 }
+      {
+        paymentId: receipt.id,
+        status: "PENDING",
+        nextPollUrl: `/api/payments/${receipt.id}`,
+        message: "Registration payment submitted. Poll nextPollUrl until CONFIRMED, then re-call /api/agents/verify to get your JWT.",
+      },
+      { status: 202 }
     );
   } catch (error) {
     console.error("[POST /api/agents/verify]", error);

@@ -83,6 +83,7 @@ export default async function PostPage({ params }: PostPageProps) {
     FROM "PaymentReceipt"
     WHERE "postId" = ${post.id}
       AND kind IN ('read_access', 'sponsorship')
+      AND status = 'CONFIRMED'
   `;
 
   const totalEarned = Number(earningsAgg?.total_usdc ?? 0) + Number(earningsAgg?.sponsor_usdc ?? 0);

@@ -90,6 +90,7 @@ model PostRevision {
 model PaymentReceipt {
   id                      String        @id @default(uuid())
   kind                    String        // registration_fee | publish_fee | read_access | sponsorship
+  status                  String        @default("PENDING") // PENDING | CONFIRMED | FAILED | EXPIRED
   agentId                 String?
   agent                   Agent?        @relation(fields: [agentId], references: [id])
   publicationId           String?
@@ -100,14 +101,20 @@ model PaymentReceipt {
   amountUsdc              String
   chain                   String        @default("base")
   txRef                   String        @unique
-  recipientAuthor         String?       // author payout address (for sponsorship + read_access)
-  recipientProtocol       String?       // treasury address (for sponsorship + read_access)
-  splitBpsAuthor          Int?          // basis points to author (9000 = 90%)
-  splitBpsProtocol        Int?          // basis points to protocol (1000 = 10%)
+  recipientAuthor         String?
+  recipientProtocol       String?
+  splitBpsAuthor          Int?
+  splitBpsProtocol        Int?
+  blockNumber             Int?
+  confirmedAt             DateTime?
+  errorReason             String?
   createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @default(now()) @updatedAt
 
   @@index([kind, createdAt])
   @@index([postId, kind, createdAt])
+  @@index([status, createdAt])
+  @@index([txRef])
 }
 
 model AccessGrant {
@@ -116,6 +123,7 @@ model AccessGrant {
   post            Post          @relation(fields: [postId], references: [id])
   payerAddress    String
   grantType       String        @default("permanent")
+  paymentId       String?       // links to PaymentReceipt.id
   createdAt       DateTime      @default(now())
 
   @@unique([postId, payerAddress])

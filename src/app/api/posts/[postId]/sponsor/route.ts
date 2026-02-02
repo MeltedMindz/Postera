@@ -22,17 +22,13 @@ const sponsorSchema = z.object({
     .refine((v) => parseFloat(v) > 0, "Amount must be greater than 0"),
 });
 
-const SPONSOR_SPLIT_BPS_AUTHOR = 9000; // 90%
-const SPONSOR_SPLIT_BPS_PROTOCOL = 1000; // 10%
+const SPONSOR_SPLIT_BPS_AUTHOR = 9000;
+const SPONSOR_SPLIT_BPS_PROTOCOL = 1000;
 
-/**
- * Compute the 90/10 split amounts in USDC micro-units (6 decimals).
- * Returns string amounts that sum exactly to the total.
- */
 function computeSplit(totalUsdc: string) {
   const totalMicro = parseUsdcMicro(totalUsdc);
   const authorMicro = (totalMicro * BigInt(SPONSOR_SPLIT_BPS_AUTHOR)) / BigInt(10000);
-  const protocolMicro = totalMicro - authorMicro; // remainder goes to protocol
+  const protocolMicro = totalMicro - authorMicro;
   return {
     authorUsdc: formatMicro(authorMicro),
     protocolUsdc: formatMicro(protocolMicro),
@@ -61,16 +57,15 @@ function formatMicro(micro: bigint): string {
  * POST /api/posts/[postId]/sponsor
  *
  * Sponsor a FREE post via x402.
- * - Only allowed on non-paywalled posts
- * - Returns 402 with two payment requirements (90% author, 10% protocol)
- * - Records receipt on payment proof
+ * - Returns 402 with split payment requirements
+ * - On payment proof: creates PENDING receipt, returns 202
+ * - Content unlocks only after on-chain confirmation
  */
 export async function POST(
   req: NextRequest,
   { params }: { params: { postId: string } }
 ) {
   try {
-    // Rate limit by IP + payer address
     const ip = getRateLimitKey(req, "sponsor");
     const payerAddr = req.headers.get("x-payer-address") ?? "";
     const rlKey = payerAddr ? `sponsor:${payerAddr}` : ip;
@@ -123,10 +118,9 @@ export async function POST(
     const paymentInfo = parsePaymentResponseHeader(req);
 
     if (!paymentInfo) {
-      // Compute 90/10 split
+      // Return 402 with split info
       const { authorUsdc, protocolUsdc } = computeSplit(amountUsdc);
 
-      // Return 402 with split info — client uses splitter contract
       const paymentRequirements = {
         scheme: "split" as const,
         network: "base",
@@ -154,22 +148,26 @@ export async function POST(
       );
     }
 
-    // Payment proof provided — check for duplicate txRef
+    // Payment proof provided — check for duplicate txRef (idempotency)
     const existing = await prisma.paymentReceipt.findUnique({
       where: { txRef: paymentInfo.txRef },
     });
     if (existing) {
       return Response.json(
-        { error: "This transaction has already been recorded." },
-        { status: 409 }
+        {
+          paymentId: existing.id,
+          status: existing.status,
+          nextPollUrl: `/api/payments/${existing.id}`,
+        },
+        { status: existing.status === "CONFIRMED" ? 200 : 202 }
       );
     }
 
-    const { authorUsdc, protocolUsdc } = computeSplit(amountUsdc);
-
+    // Create PENDING receipt — do NOT count as confirmed yet
     const receipt = await prisma.paymentReceipt.create({
       data: {
         kind: "sponsorship",
+        status: "PENDING",
         agentId: post.agentId,
         publicationId: post.publicationId,
         postId: post.id,
@@ -184,41 +182,14 @@ export async function POST(
       },
     });
 
-    // Fetch updated totals (7d)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const [agg] = await prisma.$queryRaw<
-      { total_usdc: number; unique_sponsors: number }[]
-    >`
-      SELECT
-        COALESCE(SUM(CAST("amountUsdc" AS DOUBLE PRECISION)), 0) AS total_usdc,
-        COUNT(DISTINCT "payerAddress")::int AS unique_sponsors
-      FROM "PaymentReceipt"
-      WHERE kind = 'sponsorship'
-        AND "postId" = ${post.id}
-        AND "createdAt" >= ${sevenDaysAgo}
-    `;
-
     return Response.json(
       {
-        receipt: {
-          id: receipt.id,
-          kind: receipt.kind,
-          amountUsdc: receipt.amountUsdc,
-          txRef: receipt.txRef,
-          createdAt: receipt.createdAt,
-          split: {
-            authorAmount: authorUsdc,
-            protocolAmount: protocolUsdc,
-            bpsAuthor: SPONSOR_SPLIT_BPS_AUTHOR,
-            bpsProtocol: SPONSOR_SPLIT_BPS_PROTOCOL,
-          },
-        },
-        sponsorship7d: {
-          totalUsdc: Number(agg.total_usdc).toFixed(2),
-          uniqueSponsors: Number(agg.unique_sponsors),
-        },
+        paymentId: receipt.id,
+        status: "PENDING",
+        nextPollUrl: `/api/payments/${receipt.id}`,
+        message: "Sponsorship submitted. Poll nextPollUrl until status is CONFIRMED.",
       },
-      { status: 201 }
+      { status: 202 }
     );
   } catch (error) {
     console.error("[POST /api/posts/[postId]/sponsor]", error);

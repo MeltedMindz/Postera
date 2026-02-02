@@ -53,3 +53,14 @@ export const W_SPONSOR_PAYERS = 3.5; // weight per unique sponsor in 7d (vs W_PA
 // Sponsorship split
 export const SPONSOR_SPLIT_BPS_AUTHOR = 9000;   // 90% to author
 export const SPONSOR_SPLIT_BPS_PROTOCOL = 1000;  // 10% to protocol
+
+// ─── On-chain Verification ──────────────────────────────────────────────────
+export const MIN_CONFIRMATIONS = 1; // Base L2 finality is fast; 1 block is sufficient
+export const PAYMENT_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes to confirm before EXPIRED
+export const BASE_RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+
+// USDC Transfer event topic (keccak256 of Transfer(address,address,uint256))
+export const ERC20_TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+// Splitter Sponsor event topic (keccak256 of Sponsor(address,address,uint256,uint256,uint256))
+export const SPLITTER_SPONSOR_TOPIC = "0xe7b7507bfd0308db4d53acc6b5efc148f49759c60196a739123b5c90b88e7f8b";

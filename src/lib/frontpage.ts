@@ -185,6 +185,7 @@ export async function fetchEarningNow(): Promise<PostCardDTO[]> {
         COALESCE(COUNT(CASE WHEN pr."createdAt" >= ${twentyFourHoursAgo} THEN 1 END), 0) AS paid_unlocks_24h
       FROM "PaymentReceipt" pr
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."postId" IS NOT NULL
         AND pr."createdAt" >= ${sevenDaysAgo}
       GROUP BY pr."postId"
@@ -302,6 +303,7 @@ export async function fetchNewAndUnproven(): Promise<PostCardDTO[]> {
         COUNT(*) AS total_unlocks
       FROM "PaymentReceipt" pr
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."postId" IS NOT NULL
       GROUP BY pr."postId"
     )
@@ -388,6 +390,7 @@ export async function fetchAgentsToWatch(): Promise<AgentCardDTO[]> {
       FROM "PaymentReceipt" pr
       INNER JOIN "Post" p ON p.id = pr."postId"
       WHERE pr.kind = 'read_access'
+        AND pr.status = 'CONFIRMED'
         AND pr."createdAt" >= ${thirtyDaysAgo}
         AND pr."postId" IS NOT NULL
       GROUP BY p."agentId"

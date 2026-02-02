@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useAccount, useSwitchChain, useChainId } from "wagmi";
 import { useModal } from "connectkit";
 import { useSplitterPayment, type PaymentStep } from "@/hooks/useSplitterPayment";
 
 const BASE_CHAIN_ID = 8453;
 const PRESET_AMOUNTS = ["0.25", "0.50", "1.00"];
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLLS = 60;
 
 type SponsorStep =
   | "select"
@@ -14,6 +16,7 @@ type SponsorStep =
   | "wrong_chain"
   | "fetching"
   | PaymentStep
+  | "pending_confirmation"
   | "success"
   | "error";
 
@@ -34,9 +37,9 @@ export default function SponsorButton({
 }: SponsorButtonProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [custom, setCustom] = useState("");
-  const [outerStep, setOuterStep] = useState<"select" | "not_connected" | "wrong_chain" | "fetching" | "hook" | "success" | "error">("select");
+  const [outerStep, setOuterStep] = useState<"select" | "not_connected" | "wrong_chain" | "fetching" | "hook" | "pending_confirmation" | "success" | "error">("select");
   const [outerError, setOuterError] = useState("");
-  const [proofSubmitted, setProofSubmitted] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
@@ -45,9 +48,40 @@ export default function SponsorButton({
 
   const amount = selected === "custom" ? custom : selected;
 
+  const pollPaymentStatus = useCallback(
+    async (paymentId: string, pollCount = 0) => {
+      if (pollCount >= MAX_POLLS) {
+        setOuterError("Confirmation timed out. Your sponsorship may still confirm — check back later.");
+        setOuterStep("error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/payments/${paymentId}`);
+        const data = await res.json();
+
+        if (data.status === "CONFIRMED") {
+          setOuterStep("success");
+          return;
+        }
+
+        if (data.status === "FAILED" || data.status === "EXPIRED") {
+          setOuterError(data.errorReason || `Payment ${data.status.toLowerCase()}.`);
+          setOuterStep("error");
+          return;
+        }
+
+        const delay = Math.min(POLL_INTERVAL_MS * Math.pow(1.2, pollCount), 10000);
+        pollRef.current = setTimeout(() => pollPaymentStatus(paymentId, pollCount + 1), delay);
+      } catch {
+        pollRef.current = setTimeout(() => pollPaymentStatus(paymentId, pollCount + 1), POLL_INTERVAL_MS);
+      }
+    },
+    []
+  );
+
   const payment = useSplitterPayment({
     onConfirmed: async (txHash, { markSuccess, markError }) => {
-      // Submit proof to backend
       try {
         const res = await fetch(`/api/posts/${postId}/sponsor`, {
           method: "POST",
@@ -59,9 +93,14 @@ export default function SponsorButton({
           body: JSON.stringify({ amountUsdc: amount }),
         });
 
-        if (res.ok || res.status === 201) {
-          setProofSubmitted(true);
+        if (res.status === 202) {
+          const data = await res.json();
           markSuccess();
+          setOuterStep("pending_confirmation");
+          pollPaymentStatus(data.paymentId);
+        } else if (res.ok || res.status === 201) {
+          markSuccess();
+          setOuterStep("success");
         } else {
           const data = await res.json().catch(() => ({}));
           markError(data.error || "Payment verification failed.");
@@ -78,7 +117,6 @@ export default function SponsorButton({
   async function handleSponsorClick() {
     if (!amount || parseFloat(amount) <= 0) return;
     setOuterError("");
-    setProofSubmitted(false);
 
     if (!isConnected) {
       setOuterStep("not_connected");
@@ -128,6 +166,7 @@ export default function SponsorButton({
   }
 
   function handleRetry() {
+    if (pollRef.current) clearTimeout(pollRef.current);
     setOuterStep("select");
     setOuterError("");
     payment.reset();
@@ -332,7 +371,24 @@ export default function SponsorButton({
       {displayStep === "verifying" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">Recording sponsorship...</p>
+          <p className="text-sm text-gray-500 mt-2">Submitting sponsorship proof...</p>
+        </div>
+      )}
+
+      {displayStep === "pending_confirmation" && (
+        <div className="text-center py-3">
+          <Spinner />
+          <p className="text-sm text-gray-500 mt-2">Verifying on-chain...</p>
+          {payment.txHash && (
+            <a
+              href={`https://basescan.org/tx/${payment.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-indigo-600 hover:underline font-mono mt-1 inline-block"
+            >
+              {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
+            </a>
+          )}
         </div>
       )}
 

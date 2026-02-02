@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useAccount, useSwitchChain, useChainId } from "wagmi";
 import { useModal } from "connectkit";
 import { useSplitterPayment, type PaymentStep } from "@/hooks/useSplitterPayment";
 
 const BASE_CHAIN_ID = 8453;
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLLS = 60; // 3 minutes max polling
 
 type PaywallStep =
   | "initial"
@@ -13,6 +15,7 @@ type PaywallStep =
   | "wrong_chain"
   | "fetching"
   | PaymentStep
+  | "pending_confirmation"
   | "unlocked"
   | "error";
 
@@ -27,17 +30,64 @@ export default function PaywallModal({
   priceUsdc,
   onUnlocked,
 }: PaywallModalProps) {
-  const [outerStep, setOuterStep] = useState<"initial" | "not_connected" | "wrong_chain" | "fetching" | "hook" | "unlocked" | "error">("initial");
+  const [outerStep, setOuterStep] = useState<"initial" | "not_connected" | "wrong_chain" | "fetching" | "hook" | "pending_confirmation" | "unlocked" | "error">("initial");
   const [outerError, setOuterError] = useState("");
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const { setOpen } = useModal();
 
+  // Poll the payment status endpoint until CONFIRMED or terminal
+  const pollPaymentStatus = useCallback(
+    async (paymentId: string, pollCount = 0) => {
+      if (pollCount >= MAX_POLLS) {
+        setOuterError("Confirmation timed out. Your payment may still confirm — check back later.");
+        setOuterStep("error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/payments/${paymentId}`);
+        const data = await res.json();
+
+        if (data.status === "CONFIRMED") {
+          // Payment confirmed — now fetch the full content
+          const contentRes = await fetch(`/api/posts/${postId}?view=full`, {
+            headers: { "X-Payer-Address": address || "" },
+          });
+          if (contentRes.ok) {
+            const contentData = await contentRes.json();
+            onUnlocked(contentData.post?.bodyHtml || contentData.post?.body || "");
+            setOuterStep("unlocked");
+          } else {
+            setOuterError("Payment confirmed but failed to fetch content.");
+            setOuterStep("error");
+          }
+          return;
+        }
+
+        if (data.status === "FAILED" || data.status === "EXPIRED") {
+          setOuterError(data.errorReason || `Payment ${data.status.toLowerCase()}.`);
+          setOuterStep("error");
+          return;
+        }
+
+        // Still PENDING — poll again with backoff
+        const delay = Math.min(POLL_INTERVAL_MS * Math.pow(1.2, pollCount), 10000);
+        pollRef.current = setTimeout(() => pollPaymentStatus(paymentId, pollCount + 1), delay);
+      } catch {
+        // Network error — retry
+        pollRef.current = setTimeout(() => pollPaymentStatus(paymentId, pollCount + 1), POLL_INTERVAL_MS);
+      }
+    },
+    [address, postId, onUnlocked]
+  );
+
   const payment = useSplitterPayment({
     onConfirmed: async (txHash, { markSuccess, markError }) => {
-      // Submit proof to backend and unlock content
+      // Submit tx hash to backend — now returns 202 PENDING
       try {
         const res = await fetch(`/api/posts/${postId}?view=full`, {
           headers: {
@@ -46,7 +96,14 @@ export default function PaywallModal({
           },
         });
 
-        if (res.ok) {
+        if (res.status === 202) {
+          // Payment is PENDING — start polling
+          const data = await res.json();
+          markSuccess(); // Clear the hook state
+          setOuterStep("pending_confirmation");
+          pollPaymentStatus(data.paymentId);
+        } else if (res.ok) {
+          // Already confirmed (existing grant)
           const data = await res.json();
           onUnlocked(data.post?.bodyHtml || data.post?.body || "");
           markSuccess();
@@ -61,10 +118,8 @@ export default function PaywallModal({
     },
   });
 
-  // Derive display step from outer state + hook state
+  // Derive display step
   const displayStep: PaywallStep = outerStep === "hook" ? payment.step : outerStep;
-
-  // Pick error message
   const errorMsg = outerStep === "hook" ? payment.errorMessage : outerError;
 
   async function handleUnlockClick() {
@@ -80,30 +135,25 @@ export default function PaywallModal({
       return;
     }
 
-    // Fetch payment details
     setOuterStep("fetching");
     try {
-      const res = await fetch(`/api/posts/${postId}?view=full`);
+      const res = await fetch(`/api/posts/${postId}?view=full`, {
+        headers: { "X-Payer-Address": address || "" },
+      });
 
       if (res.status === 402) {
         const data = await res.json();
-        // The API returns paymentRequirements as an array
         const reqs = data.paymentRequirements;
         const recipient = reqs?.[0]?.recipient || reqs?.authorRecipient;
         const amount = reqs?.[0]?.amount || reqs?.totalAmount || priceUsdc;
         if (recipient) {
-          // Hand off to splitter hook
           setOuterStep("hook");
-          payment.execute(
-            recipient as `0x${string}`,
-            amount
-          );
+          payment.execute(recipient as `0x${string}`, amount);
         } else {
           setOuterError("Unexpected payment response.");
           setOuterStep("error");
         }
       } else if (res.ok) {
-        // Already unlocked
         const data = await res.json();
         onUnlocked(data.post?.bodyHtml || data.post?.body || "");
         setOuterStep("unlocked");
@@ -119,6 +169,7 @@ export default function PaywallModal({
   }
 
   function handleRetry() {
+    if (pollRef.current) clearTimeout(pollRef.current);
     setOuterStep("initial");
     setOuterError("");
     payment.reset();
@@ -275,11 +326,33 @@ export default function PaywallModal({
           <>
             <Spinner />
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Unlocking content...
+              Submitting payment proof...
             </h3>
             <p className="text-sm text-gray-500">
-              Payment confirmed. Fetching your content.
+              Sending transaction to Postera for verification.
             </p>
+          </>
+        )}
+
+        {displayStep === "pending_confirmation" && (
+          <>
+            <Spinner />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Verifying on-chain...
+            </h3>
+            <p className="text-sm text-gray-500 mb-2">
+              Confirming your payment on Base. This usually takes a few seconds.
+            </p>
+            {payment.txHash && (
+              <a
+                href={`https://basescan.org/tx/${payment.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-indigo-600 hover:underline font-mono"
+              >
+                {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
+              </a>
+            )}
           </>
         )}
 

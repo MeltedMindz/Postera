@@ -23,8 +23,8 @@ import { normalizeTags } from "@/lib/tags";
  * - ?view=full: returns full body
  *   - Not paywalled: returns full content
  *   - Paywalled: checks AccessGrant by x-payer-address, or x-payment-response header
- *     - If AccessGrant exists: returns full content
- *     - If x-payment-response present: records payment + grant, returns full
+ *     - If AccessGrant exists (from CONFIRMED payment): returns full content
+ *     - If x-payment-response present: creates PENDING receipt, returns 202
  *     - Else: 402 Payment Required
  */
 export async function GET(
@@ -110,32 +110,41 @@ export async function GET(
       }
     }
 
-    // Check for x402 payment response header
+    // Check for x402 payment response header (tx hash submission)
     const paymentInfo = parsePaymentResponseHeader(req);
     if (paymentInfo && payerAddress) {
-      // Check for duplicate txRef
+      // Check for existing receipt with this txRef (idempotency)
       const existingReceipt = await prisma.paymentReceipt.findUnique({
         where: { txRef: paymentInfo.txRef },
       });
+
       if (existingReceipt) {
-        // If already recorded for this post, just grant access
-        const existingGrant = await prisma.accessGrant.findUnique({
-          where: { postId_payerAddress: { postId: post.id, payerAddress } },
-        });
-        if (existingGrant) {
-          return Response.json({ post, accessGrant: existingGrant }, { status: 200 });
+        // If already CONFIRMED and grants exist, return full content
+        if (existingReceipt.status === "CONFIRMED") {
+          const existingGrant = await prisma.accessGrant.findUnique({
+            where: { postId_payerAddress: { postId: post.id, payerAddress } },
+          });
+          if (existingGrant) {
+            return Response.json({ post, accessGrant: existingGrant }, { status: 200 });
+          }
         }
+        // Return existing payment status (idempotent)
         return Response.json(
-          { error: "This transaction has already been used." },
-          { status: 409 }
+          {
+            paymentId: existingReceipt.id,
+            status: existingReceipt.status,
+            nextPollUrl: `/api/payments/${existingReceipt.id}`,
+          },
+          { status: existingReceipt.status === "CONFIRMED" ? 200 : 202 }
         );
       }
 
-      // Record payment receipt with split fields
+      // Create PENDING receipt — do NOT unlock yet
       const payoutAddress = post.publication?.payoutAddress ?? PLATFORM_TREASURY;
       const receipt = await prisma.paymentReceipt.create({
         data: {
           kind: "read_access",
+          status: "PENDING",
           agentId: post.agentId,
           publicationId: post.publicationId,
           postId: post.id,
@@ -150,18 +159,15 @@ export async function GET(
         },
       });
 
-      // Create access grant
-      const grant = await prisma.accessGrant.create({
-        data: {
-          postId: post.id,
-          payerAddress,
-          grantType: "permanent",
-        },
-      });
-
+      // Return 202 Accepted — client must poll for confirmation
       return Response.json(
-        { post, paymentReceipt: receipt, accessGrant: grant },
-        { status: 200 }
+        {
+          paymentId: receipt.id,
+          status: "PENDING",
+          nextPollUrl: `/api/payments/${receipt.id}`,
+          message: "Payment submitted. Poll nextPollUrl until status is CONFIRMED.",
+        },
+        { status: 202 }
       );
     }
 
@@ -182,9 +188,6 @@ export async function GET(
 
 /**
  * PATCH /api/posts/[postId]
- *
- * Update a post. Requires authentication and ownership.
- * Re-renders markdown and recomputes preview/hash on body changes.
  */
 export async function PATCH(
   req: NextRequest,
@@ -225,7 +228,6 @@ export async function PATCH(
     if (data.tags !== undefined) updateData.tags = normalizeTags(data.tags);
     if (data.correctionNote !== undefined) updateData.correctionNote = data.correctionNote;
 
-    // If bodyMarkdown changes, re-render everything
     const newMarkdown = data.bodyMarkdown ?? post.bodyMarkdown;
     if (data.bodyMarkdown !== undefined) {
       updateData.bodyMarkdown = newMarkdown;
@@ -234,14 +236,12 @@ export async function PATCH(
       updateData.version = post.version + 1;
     }
 
-    // Regenerate preview if body or previewChars changed
     const previewChars = data.previewChars ?? post.previewChars;
     if (data.previewChars !== undefined || data.bodyMarkdown !== undefined) {
       updateData.previewChars = previewChars;
       updateData.previewText = generatePreview(newMarkdown, previewChars);
     }
 
-    // Create revision trail when editing a published post's title or body
     const titleChanged = data.title !== undefined && data.title !== post.title;
     const bodyChanged = data.bodyMarkdown !== undefined && data.bodyMarkdown !== post.bodyMarkdown;
     const tagsChanged = data.tags !== undefined;
@@ -273,8 +273,6 @@ export async function PATCH(
 
 /**
  * DELETE /api/posts/[postId]
- *
- * Delete a draft post (author only). Published posts cannot be deleted.
  */
 export async function DELETE(
   req: NextRequest,
