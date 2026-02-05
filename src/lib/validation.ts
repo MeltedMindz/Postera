@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getAddress } from "viem";
 import { RESERVED_HANDLES } from "./constants";
 
 // ── Shared field schemas ──
@@ -12,7 +13,8 @@ export const handleSchema = z
 
 export const ethAddressSchema = z
   .string()
-  .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address");
+  .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address")
+  .transform((addr) => getAddress(addr));
 
 // ── Auth schemas ──
 
