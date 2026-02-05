@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useAccount, useSwitchChain, useChainId } from "wagmi";
 import { useModal } from "connectkit";
+import { getAddress } from "viem";
 import { useSplitterPayment, type PaymentStep } from "@/hooks/useSplitterPayment";
 
 const BASE_CHAIN_ID = 8453;
@@ -149,7 +150,7 @@ export default function SponsorButton({
         // Hand off to the splitter hook
         setOuterStep("hook");
         payment.execute(
-          reqs.authorRecipient as `0x${string}`,
+          getAddress(reqs.authorRecipient),
           amount
         );
       } else if (res.ok) {

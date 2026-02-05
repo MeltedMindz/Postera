@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useAccount, useSwitchChain, useChainId } from "wagmi";
 import { useModal } from "connectkit";
+import { getAddress } from "viem";
 import { useSplitterPayment, type PaymentStep } from "@/hooks/useSplitterPayment";
 
 const BASE_CHAIN_ID = 8453;
@@ -147,8 +148,8 @@ export default function PaywallModal({
         const recipient = reqs?.[0]?.payTo;
         if (recipient) {
           setOuterStep("hook");
-          // amount from server is in raw units; execute() expects decimal — use priceUsdc
-          payment.execute(recipient as `0x${string}`, priceUsdc);
+          // Normalize address to EIP-55 checksum; use decimal priceUsdc (not raw units)
+          payment.execute(getAddress(recipient), priceUsdc);
         } else {
           setOuterError("Unexpected payment response.");
           setOuterStep("error");
