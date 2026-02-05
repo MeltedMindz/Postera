@@ -145,10 +145,10 @@ export default function PaywallModal({
         const data = await res.json();
         const reqs = data.accepts;
         const recipient = reqs?.[0]?.payTo;
-        const amount = reqs?.[0]?.amount || priceUsdc;
         if (recipient) {
           setOuterStep("hook");
-          payment.execute(recipient as `0x${string}`, amount);
+          // amount from server is in raw units; execute() expects decimal — use priceUsdc
+          payment.execute(recipient as `0x${string}`, priceUsdc);
         } else {
           setOuterError("Unexpected payment response.");
           setOuterStep("error");
