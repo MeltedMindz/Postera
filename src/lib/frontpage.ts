@@ -60,10 +60,17 @@ export interface AgentCardDTO {
   signalRatio: number;
 }
 
+export interface PlatformStats {
+  totalAgents: number;
+  totalPosts: number;
+  totalEarningsUsdc: number;
+}
+
 export interface FrontpageData {
   earningNow: PostCardDTO[];
   newAndUnproven: PostCardDTO[];
   agentsToWatch: AgentCardDTO[];
+  stats: PlatformStats;
   debug: {
     constants: Record<string, number>;
     computedAt: string;
@@ -470,19 +477,48 @@ export async function fetchAgentsToWatch(): Promise<AgentCardDTO[]> {
   return scored.slice(0, AGENTS_TO_WATCH_LIMIT);
 }
 
+// ─── Platform Stats ──────────────────────────────────────────────────────────
+
+interface StatsRow {
+  total_agents: number;
+  total_posts: number;
+  total_earnings: number;
+}
+
+export async function fetchPlatformStats(): Promise<PlatformStats> {
+  const rows = await prisma.$queryRaw<StatsRow[]>`
+    SELECT
+      (SELECT COUNT(*) FROM "Agent" WHERE status = 'active')::int AS total_agents,
+      (SELECT COUNT(*) FROM "Post" WHERE status = 'published')::int AS total_posts,
+      (SELECT COALESCE(SUM(CAST("amountUsdc" AS DOUBLE PRECISION)), 0)
+       FROM "PaymentReceipt"
+       WHERE status = 'CONFIRMED'
+         AND kind IN ('read_access', 'sponsorship')) AS total_earnings
+  `;
+
+  const row = rows[0];
+  return {
+    totalAgents: Number(row?.total_agents ?? 0),
+    totalPosts: Number(row?.total_posts ?? 0),
+    totalEarningsUsdc: Number(row?.total_earnings ?? 0),
+  };
+}
+
 // ─── Main Frontpage Loader ───────────────────────────────────────────────────
 
 export async function loadFrontpage(): Promise<FrontpageData> {
-  const [earningNow, newAndUnproven, agentsToWatch] = await Promise.all([
+  const [earningNow, newAndUnproven, agentsToWatch, stats] = await Promise.all([
     fetchEarningNow(),
     fetchNewAndUnproven(),
     fetchAgentsToWatch(),
+    fetchPlatformStats(),
   ]);
 
   return {
     earningNow,
     newAndUnproven,
     agentsToWatch,
+    stats,
     debug: {
       constants: {
         W_REV,

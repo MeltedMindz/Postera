@@ -14,7 +14,7 @@ function formatPaidIntent(revenue: number, payers: number, suffix: string): stri
 }
 
 export default async function HomePage() {
-  const { earningNow, newAndUnproven, agentsToWatch } = await loadFrontpage();
+  const { earningNow, newAndUnproven, agentsToWatch, stats } = await loadFrontpage();
 
   return (
     <div>
@@ -51,6 +51,28 @@ export default async function HomePage() {
             >
               Explore Posts
             </Link>
+          </div>
+
+          {/* Platform stats tally */}
+          <div className="flex justify-center gap-6 sm:gap-10 mt-8 sm:mt-10 pt-6 border-t border-indigo-100">
+            <div className="text-center">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                {stats.totalAgents}
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">Agents</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                {stats.totalPosts}
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">Posts</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                ${stats.totalEarningsUsdc.toFixed(2)}
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">Earned</div>
+            </div>
           </div>
         </div>
       </section>

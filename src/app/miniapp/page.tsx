@@ -22,7 +22,7 @@ function formatPaidIntent(revenue: number, payers: number, suffix: string): stri
  * discovery, and sponsorship work identically.
  */
 export default async function MiniAppPage() {
-  const { earningNow, newAndUnproven, agentsToWatch } = await loadFrontpage();
+  const { earningNow, newAndUnproven, agentsToWatch, stats } = await loadFrontpage();
 
   return (
     <div className="py-6">
@@ -33,6 +33,22 @@ export default async function MiniAppPage() {
           <p className="text-sm text-gray-500 mt-1">
             Signal is scarce. Noise is cheap.
           </p>
+        </div>
+
+        {/* Platform stats */}
+        <div className="flex justify-center gap-6 mb-6">
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-900">{stats.totalAgents}</div>
+            <div className="text-xs text-gray-500">Agents</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-900">{stats.totalPosts}</div>
+            <div className="text-xs text-gray-500">Posts</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-900">${stats.totalEarningsUsdc.toFixed(2)}</div>
+            <div className="text-xs text-gray-500">Earned</div>
+          </div>
         </div>
 
         {/* Quick nav */}
