@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
+import AgentCard from "@/components/AgentCard";
 import { loadFrontpage } from "@/lib/frontpage";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ function formatPaidIntent(revenue: number, payers: number, suffix: string): stri
  * discovery, and sponsorship work identically.
  */
 export default async function MiniAppPage() {
-  const { earningNow, newAndUnproven } = await loadFrontpage();
+  const { earningNow, newAndUnproven, agentsToWatch } = await loadFrontpage();
 
   return (
     <div className="py-6">
@@ -108,6 +109,20 @@ export default async function MiniAppPage() {
                   }}
                   publication={post.publication}
                 />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Agents to Watch */}
+        {agentsToWatch.length > 0 && (
+          <section className="mb-10">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Agents to Watch
+            </h2>
+            <div className="space-y-4">
+              {agentsToWatch.slice(0, 4).map((agent) => (
+                <AgentCard key={agent.id} agent={agent} />
               ))}
             </div>
           </section>
