@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildPaymentRequired,
+  buildPaymentRequiredResponse,
   buildRegistrationPaymentRequired,
   buildPublishPaymentRequired,
   buildReadPaymentRequired,
@@ -11,34 +11,38 @@ import {
 } from "../src/lib/x402";
 
 describe("x402 helpers", () => {
-  describe("buildPaymentRequired", () => {
-    it("returns 402 status with correct headers", () => {
-      const res = buildPaymentRequired({
+  describe("buildPaymentRequiredResponse", () => {
+    it("returns 402 status with x402 v2 format", async () => {
+      const res = buildPaymentRequiredResponse({
         amount: "1.00",
         recipient: "0xTREASURY",
         memo: "registration_fee",
         description: "Test payment",
       });
       expect(res.status).toBe(402);
-      expect(res.headers.get("X-Payment-Amount")).toBe("1.00");
-      expect(res.headers.get("X-Payment-Recipient")).toBe("0xTREASURY");
-      expect(res.headers.get("X-Payment-Memo")).toBe("registration_fee");
-      expect(res.headers.get("X-Payment-Currency")).toBe("USDC");
-      expect(res.headers.get("X-Payment-Chain")).toBe("base");
+      
+      const body = await res.json();
+      expect(body.x402Version).toBe(2);
+      expect(body.error).toBe("Payment Required");
+      expect(body.accepts).toHaveLength(1);
     });
 
-    it("includes payment payload in body", async () => {
-      const res = buildPaymentRequired({
+    it("includes correct payment requirements in body", async () => {
+      const res = buildPaymentRequiredResponse({
         amount: "0.50",
         recipient: "0xABC",
         memo: "read_access:post123",
         description: "Unlock post",
       });
       const body = await res.json();
-      expect(body.error).toBe("Payment Required");
-      expect(body.payment.amount).toBe("0.50");
-      expect(body.payment.contractAddress).toBeTruthy();
-      expect(body.payment.chainId).toBe(8453);
+      
+      expect(body.x402Version).toBe(2);
+      expect(body.accepts[0].scheme).toBe("exact");
+      expect(body.accepts[0].network).toBe("eip155:8453");
+      expect(body.accepts[0].amount).toBe("500000"); // 0.50 USDC in units
+      expect(body.accepts[0].payTo).toBe("0xABC");
+      expect(body.accepts[0].extra.memo).toBe("read_access:post123");
+      expect(body.accepts[0].extra.description).toBe("Unlock post");
     });
   });
 
@@ -46,8 +50,11 @@ describe("x402 helpers", () => {
     it("returns 402 for $1.00 with registration_fee memo", async () => {
       const res = buildRegistrationPaymentRequired();
       expect(res.status).toBe(402);
-      expect(res.headers.get("X-Payment-Amount")).toBe("1.00");
-      expect(res.headers.get("X-Payment-Memo")).toBe("registration_fee");
+      
+      const body = await res.json();
+      expect(body.x402Version).toBe(2);
+      expect(body.accepts[0].amount).toBe("1000000"); // $1.00 in units
+      expect(body.accepts[0].extra.memo).toBe("registration_fee");
     });
   });
 
@@ -55,38 +62,66 @@ describe("x402 helpers", () => {
     it("returns 402 for $0.10 with publish_fee memo", async () => {
       const res = buildPublishPaymentRequired();
       expect(res.status).toBe(402);
-      expect(res.headers.get("X-Payment-Amount")).toBe("0.10");
-      expect(res.headers.get("X-Payment-Memo")).toBe("publish_fee");
+      
+      const body = await res.json();
+      expect(body.x402Version).toBe(2);
+      expect(body.accepts[0].amount).toBe("100000"); // $0.10 in units
+      expect(body.accepts[0].extra.memo).toBe("publish_fee");
     });
   });
 
   describe("buildReadPaymentRequired", () => {
-    it("returns 402 with correct post-specific memo", async () => {
+    it("returns 402 with correct post-specific memo and recipient", async () => {
       const res = buildReadPaymentRequired("post-xyz", "0.75", "0xPAYOUT");
       expect(res.status).toBe(402);
-      expect(res.headers.get("X-Payment-Amount")).toBe("0.75");
-      expect(res.headers.get("X-Payment-Memo")).toBe("read_access:post-xyz");
-      expect(res.headers.get("X-Payment-Recipient")).toBe("0xPAYOUT");
+      
+      const body = await res.json();
+      expect(body.x402Version).toBe(2);
+      expect(body.accepts[0].amount).toBe("750000"); // $0.75 in units
+      expect(body.accepts[0].extra.memo).toBe("read_access:post-xyz");
+      expect(body.accepts[0].payTo).toBe("0xPAYOUT");
     });
   });
 
   describe("extractPaymentProof", () => {
-    it("extracts payment headers from request", () => {
+    it("extracts payment from x402 v2 request body", async () => {
       const req = new Request("http://localhost", {
-        headers: {
-          "X-Payment-Response": "0xTX123",
-          "X-Payer-Address": "0xPAYER",
-        },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          x402Version: 2,
+          payload: {
+            txHash: "0xTX123",
+            payerAddress: "0xPAYER",
+          },
+          accepted: {
+            network: "eip155:8453",
+          },
+        }),
       });
-      const proof = extractPaymentProof(req);
+      const proof = await extractPaymentProof(req);
       expect(proof).not.toBeNull();
       expect(proof!.txRef).toBe("0xTX123");
       expect(proof!.payerAddress).toBe("0xPAYER");
+      expect(proof!.network).toBe("eip155:8453");
     });
 
-    it("returns null if no payment headers", () => {
+    it("falls back to headers for backward compatibility", async () => {
+      const req = new Request("http://localhost", {
+        headers: {
+          "X-Payment-Response": "0xTX456",
+          "X-Payer-Address": "0xPAYER2",
+        },
+      });
+      const proof = await extractPaymentProof(req);
+      expect(proof).not.toBeNull();
+      expect(proof!.txRef).toBe("0xTX456");
+      expect(proof!.payerAddress).toBe("0xPAYER2");
+    });
+
+    it("returns null if no payment data", async () => {
       const req = new Request("http://localhost");
-      const proof = extractPaymentProof(req);
+      const proof = await extractPaymentProof(req);
       expect(proof).toBeNull();
     });
   });

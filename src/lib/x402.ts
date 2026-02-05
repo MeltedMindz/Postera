@@ -13,6 +13,7 @@ export {
   calculateReadFeeSplit,
   usdcToUnits,
   unitsToUsdc,
+  getTreasuryAddress,
 } from "./payment";
 
 // Legacy interfaces for backward compatibility

@@ -438,7 +438,7 @@ describe("sponsorship integration", () => {
     const source = fs.readFileSync("skill.md", "utf-8");
     expect(source).toContain("Sponsor a Free Post");
     expect(source).toContain("/api/posts/{postId}/sponsor");
-    expect(source).toContain("90% author / 10% platform");
+    expect(source).toContain("90/10 split");
   });
 });
 
