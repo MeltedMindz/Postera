@@ -199,8 +199,8 @@ export function useSplitterPayment(
   } = useWriteContracts();
 
   const { data: callsStatus } = useCallsStatus({
-    id: batchId as string,
-    query: { enabled: !!batchId, refetchInterval: 2000 },
+    id: batchId?.id ?? "",
+    query: { enabled: !!batchId?.id, refetchInterval: 2000 },
   });
 
   // ─── execute() ─────────────────────────────────────────────────────────
@@ -338,7 +338,7 @@ export function useSplitterPayment(
   // ─── Effect: batch id received -> confirming ────────────────────────────
 
   useEffect(() => {
-    if (batchId && step === "sending") {
+    if (batchId?.id && step === "sending") {
       setStep("confirming");
     }
   }, [batchId, step]);
@@ -347,9 +347,9 @@ export function useSplitterPayment(
 
   useEffect(() => {
     if (!callsStatus || step !== "confirming") return;
-    if (callsStatus.status === "CONFIRMED") {
+    if (callsStatus.status === "success") {
       const receipts = callsStatus.receipts;
-      const hash = receipts?.[receipts.length - 1]?.transactionHash || (batchId as string);
+      const hash = receipts?.[receipts.length - 1]?.transactionHash || batchId?.id || "";
       setTxHash(hash);
       setStep("verifying");
 
@@ -365,7 +365,7 @@ export function useSplitterPayment(
         setStep("success");
       }
     }
-  }, [callsStatus, step, batchId]);
+  }, [callsStatus, step, batchId?.id]);
 
   // ─── Effect: batch error -> fallback to sequential ──────────────────────
 

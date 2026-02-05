@@ -1,4 +1,3 @@
-import { PaymentRequirements, PaymentRequired, PaymentPayload } from "@x402/core";
 import {
   USDC_CONTRACT_BASE,
   BASE_CHAIN_ID,
@@ -6,6 +5,23 @@ import {
   USDC_DECIMALS,
   PLATFORM_FEE_PERCENT,
 } from "./constants";
+
+// x402 v2 types - simplified for our use case
+interface X402PaymentRequirements {
+  scheme: string;
+  network: string;
+  asset: string;
+  amount: string;
+  payTo: string;
+  maxTimeoutSeconds: number;
+  extra: Record<string, unknown>;
+}
+
+interface X402PaymentRequired {
+  x402Version: number;
+  error?: string;
+  accepts: X402PaymentRequirements[];
+}
 
 /**
  * Build a standard x402 v2 Payment Required response.
@@ -18,8 +34,8 @@ export function buildPaymentRequiredResponse(opts: {
   memo?: string;
 }): Response {
   const amountUnits = usdcToUnits(opts.amount);
-  
-  const paymentRequirements: PaymentRequirements = {
+
+  const paymentRequirements: X402PaymentRequirements = {
     scheme: "exact",
     network: `eip155:${BASE_CHAIN_ID}`, // Standard format: eip155:8453
     asset: USDC_CONTRACT_BASE,
@@ -32,7 +48,7 @@ export function buildPaymentRequiredResponse(opts: {
     },
   };
 
-  const response: PaymentRequired = {
+  const response: X402PaymentRequired = {
     x402Version: 2,
     error: "Payment Required",
     accepts: [paymentRequirements],
@@ -81,6 +97,18 @@ export function buildReadPaymentRequired(
   });
 }
 
+// x402 v2 payment payload structure (from client)
+interface X402PaymentPayload {
+  x402Version: number;
+  payload?: {
+    txHash?: string;
+    payerAddress?: string;
+  };
+  accepted?: {
+    network?: string;
+  };
+}
+
 /**
  * Parse payment payload from x402 client request.
  * Looks for the standard x402 payment payload in request body.
@@ -91,24 +119,26 @@ export async function parsePaymentPayload(req: Request): Promise<{
   network: string;
 } | null> {
   try {
-    const body = await req.json();
-    
+    const body = (await req.json()) as X402PaymentPayload;
+
     // x402 v2 format
     if (body.x402Version === 2 && body.payload) {
-      const payload = body.payload as PaymentPayload;
-      if (payload.txHash) {
+      if (body.payload.txHash) {
         return {
-          txRef: payload.txHash,
-          payerAddress: payload.payerAddress || "",
+          txRef: body.payload.txHash,
+          payerAddress: body.payload.payerAddress || "",
           network: body.accepted?.network || `eip155:${BASE_CHAIN_ID}`,
         };
       }
     }
-    
+
     // Fallback: check headers for backward compatibility
-    const txRef = req.headers.get("x-payment-response") || req.headers.get("X-Payment-Response");
-    const payerAddress = req.headers.get("x-payer-address") || req.headers.get("X-Payer-Address");
-    
+    const txRef =
+      req.headers.get("x-payment-response") ||
+      req.headers.get("X-Payment-Response");
+    const payerAddress =
+      req.headers.get("x-payer-address") || req.headers.get("X-Payer-Address");
+
     if (txRef) {
       return {
         txRef,
@@ -116,13 +146,16 @@ export async function parsePaymentPayload(req: Request): Promise<{
         network: `eip155:${BASE_CHAIN_ID}`,
       };
     }
-    
+
     return null;
-  } catch (error) {
+  } catch {
     // Try headers as fallback
-    const txRef = req.headers.get("x-payment-response") || req.headers.get("X-Payment-Response");
-    const payerAddress = req.headers.get("x-payer-address") || req.headers.get("X-Payer-Address");
-    
+    const txRef =
+      req.headers.get("x-payment-response") ||
+      req.headers.get("X-Payment-Response");
+    const payerAddress =
+      req.headers.get("x-payer-address") || req.headers.get("X-Payer-Address");
+
     if (txRef) {
       return {
         txRef,
@@ -130,7 +163,7 @@ export async function parsePaymentPayload(req: Request): Promise<{
         network: `eip155:${BASE_CHAIN_ID}`,
       };
     }
-    
+
     return null;
   }
 }
