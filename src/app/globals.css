@@ -4,13 +4,12 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #111827;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --brand: #4f46e5;
-    --brand-light: #818cf8;
-    --brand-dark: #3730a3;
+    --background: #0a0a0a;
+    --foreground: #e5e5e5;
+    --muted: #737373;
+    --border: #262626;
+    --accent: #64748b;
+    --accent-lime: #84cc16;
   }
 
   html {
@@ -18,8 +17,28 @@
   }
 
   body {
-    @apply bg-white text-gray-900 antialiased;
+    @apply bg-bg text-text-primary antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    background: rgba(100, 116, 139, 0.3);
+    color: #e5e5e5;
+  }
+
+  /* Subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333333;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #404040;
   }
 }
 
@@ -30,55 +49,62 @@
   .container-wide {
     @apply max-w-6xl mx-auto px-4 sm:px-6;
   }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-text-primary text-bg font-medium rounded-md hover:bg-white transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-5 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors;
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-transparent text-text-secondary font-medium rounded-md border border-border-strong hover:border-border-active hover:text-text-primary transition-colors duration-150;
   }
   .btn-unlock {
-    @apply inline-flex items-center justify-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors text-lg;
-  }
-  .card {
-    @apply bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow;
-  }
-  .input {
-    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition;
-  }
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center justify-center px-6 py-3 bg-text-primary text-bg font-semibold rounded-md hover:bg-white transition-colors duration-150 text-lg;
   }
 
-  /* Article prose styles */
+  .card {
+    @apply bg-bg-card rounded-lg border border-border p-6 hover:border-border-strong transition-colors duration-150;
+  }
+
+  .input {
+    @apply w-full px-4 py-2.5 border border-border-strong rounded-md bg-bg-card text-text-primary focus:ring-1 focus:ring-border-active focus:border-border-active outline-none transition duration-150 placeholder:text-text-muted;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium font-mono;
+  }
+
+  /* Article prose styles — dark mode */
   .prose-postera h1 {
-    @apply text-3xl font-bold text-gray-900 mb-4;
+    @apply text-3xl font-bold text-text-primary mb-4;
   }
   .prose-postera h2 {
-    @apply text-2xl font-semibold text-gray-900 mb-3;
+    @apply text-2xl font-semibold text-text-primary mb-3 mt-8;
   }
   .prose-postera h3 {
-    @apply text-xl font-semibold text-gray-800 mb-2;
+    @apply text-xl font-semibold text-text-primary mb-2 mt-6;
   }
   .prose-postera p {
-    @apply text-gray-700 leading-relaxed mb-4;
+    @apply text-text-secondary leading-relaxed mb-4;
   }
   .prose-postera a {
-    @apply text-indigo-600 underline hover:text-indigo-800;
+    @apply text-accent-slate underline underline-offset-2 hover:text-text-primary transition-colors duration-150;
   }
   .prose-postera blockquote {
-    @apply border-l-4 border-indigo-300 pl-4 italic text-gray-600;
+    @apply border-l-2 border-border-strong pl-4 italic text-text-muted;
   }
   .prose-postera pre {
-    @apply bg-gray-50 rounded-lg p-4 overflow-x-auto;
+    @apply bg-bg-card border border-border rounded-lg p-4 overflow-x-auto;
   }
   .prose-postera code {
-    @apply bg-gray-100 rounded px-1 py-0.5 text-sm font-mono;
+    @apply bg-bg-card border border-border rounded px-1.5 py-0.5 text-sm font-mono text-text-secondary;
+  }
+  .prose-postera pre code {
+    @apply border-0 bg-transparent p-0;
   }
   .prose-postera ul {
-    @apply list-disc pl-6 mb-4 text-gray-700;
+    @apply list-disc pl-6 mb-4 text-text-secondary;
   }
   .prose-postera ol {
-    @apply list-decimal pl-6 mb-4 text-gray-700;
+    @apply list-decimal pl-6 mb-4 text-text-secondary;
   }
   .prose-postera li {
     @apply mb-1 leading-relaxed;
@@ -87,33 +113,37 @@
     @apply rounded-lg my-6;
   }
   .prose-postera hr {
-    @apply my-8 border-gray-200;
+    @apply my-8 border-border;
   }
   .prose-postera table {
     @apply w-full border-collapse mb-6 text-sm;
   }
   .prose-postera thead th {
-    @apply text-left font-semibold text-gray-900 border-b-2 border-gray-300 px-3 py-2;
+    @apply text-left font-semibold text-text-primary border-b border-border-strong px-3 py-2;
   }
   .prose-postera tbody td {
-    @apply text-gray-700 border-b border-gray-200 px-3 py-2;
+    @apply text-text-secondary border-b border-border px-3 py-2;
   }
   .prose-postera tbody tr:hover {
-    @apply bg-gray-50;
+    @apply bg-bg-elevated;
   }
 
-  /* Paywall gradient fade */
+  /* Paywall gradient fade — dark */
   .paywall-blur {
     @apply relative overflow-hidden;
   }
   .paywall-blur::after {
     content: "";
-    @apply absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent;
+    @apply absolute bottom-0 left-0 right-0 h-48;
+    background: linear-gradient(to top, #0a0a0a, rgba(10, 10, 10, 0.8), transparent);
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
   }
 }

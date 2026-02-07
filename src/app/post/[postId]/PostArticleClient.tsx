@@ -68,10 +68,10 @@ export default function PostArticleClient({
       <div>
         <div className="paywall-blur mb-0">
           <div className="prose-postera">
-            <p className="text-gray-700 leading-relaxed text-lg">{previewText}</p>
+            <p className="text-text-secondary leading-relaxed text-lg">{previewText}</p>
           </div>
         </div>
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-text-muted font-mono">
           Checking access...
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function PostArticleClient({
       {/* Preview text with gradient fade */}
       <div className="paywall-blur mb-0">
         <div className="prose-postera">
-          <p className="text-gray-700 leading-relaxed text-lg">{previewText}</p>
+          <p className="text-text-secondary leading-relaxed text-lg">{previewText}</p>
         </div>
       </div>
 

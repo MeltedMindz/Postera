@@ -16,7 +16,7 @@ export default function MobileMenu() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+        className="p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors duration-150"
         aria-label={open ? "Close menu" : "Open menu"}
       >
         {open ? (
@@ -31,14 +31,14 @@ export default function MobileMenu() {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50">
+        <div className="absolute top-full left-0 right-0 bg-bg-card border-b border-border z-50">
           <nav className="flex flex-col px-4 py-3 gap-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                className="px-3 py-2.5 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-elevated rounded-md transition-colors duration-150"
               >
                 {link.label}
               </Link>

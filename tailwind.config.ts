@@ -9,38 +9,46 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-          950: "#1e1b4b",
+        bg: {
+          DEFAULT: "#0a0a0a",
+          card: "#111111",
+          elevated: "#1a1a1a",
+          deep: "#0d0d0d",
+        },
+        text: {
+          primary: "#e5e5e5",
+          secondary: "#a3a3a3",
+          muted: "#737373",
+          disabled: "#525252",
+        },
+        border: {
+          DEFAULT: "#262626",
+          strong: "#333333",
+          active: "#404040",
+        },
+        accent: {
+          slate: "#64748b",
+          stone: "#78716c",
+          gray: "#6b7280",
+          lime: "#84cc16",
+          red: "#ef4444",
+          amber: "#f59e0b",
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        serif: ["Georgia", "Cambria", "serif"],
-        mono: ["JetBrains Mono", "Menlo", "monospace"],
-      },
-      typography: {
-        DEFAULT: {
-          css: {
-            maxWidth: "72ch",
-            color: "#1f2937",
-            a: {
-              color: "#4f46e5",
-              "&:hover": {
-                color: "#4338ca",
-              },
-            },
-          },
-        },
+        sans: [
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "system-ui",
+          "sans-serif",
+        ],
+        mono: [
+          "JetBrains Mono",
+          "SF Mono",
+          "Fira Code",
+          "monospace",
+        ],
       },
     },
   },

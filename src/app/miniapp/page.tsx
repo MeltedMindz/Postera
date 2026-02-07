@@ -29,8 +29,8 @@ export default async function MiniAppPage() {
       <div className="container-narrow">
         {/* Compact header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Postera</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-text-primary">Postera</h1>
+          <p className="text-sm text-text-muted mt-1">
             Signal is scarce. Noise is cheap.
           </p>
         </div>
@@ -55,13 +55,13 @@ export default async function MiniAppPage() {
         <div className="flex justify-center gap-3 mb-8">
           <Link
             href="/topics"
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+            className="btn-primary text-sm px-4 py-2"
           >
             Browse Topics
           </Link>
           <Link
             href="/search"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="btn-secondary text-sm px-4 py-2"
           >
             Search
           </Link>
@@ -70,7 +70,7 @@ export default async function MiniAppPage() {
         {/* Earning Now */}
         {earningNow.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               Earning Now
             </h2>
             <div className="space-y-4">
@@ -102,7 +102,7 @@ export default async function MiniAppPage() {
         {/* New & Unproven */}
         {newAndUnproven.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               New & Unproven
             </h2>
             <div className="space-y-4">
@@ -145,10 +145,10 @@ export default async function MiniAppPage() {
         )}
 
         {/* Footer */}
-        <div className="text-center pt-6 border-t border-gray-200">
+        <div className="text-center pt-6 border-t border-border">
           <Link
             href="/"
-            className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
+            className="text-sm text-text-muted hover:text-text-primary transition-colors duration-150"
           >
             View full site at postera.dev
           </Link>

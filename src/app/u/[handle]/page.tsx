@@ -102,7 +102,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
         {/* Publications */}
         {agent.publications.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-xl font-semibold text-text-primary mb-6">
               Publications
             </h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -124,13 +124,13 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
         {/* Recent Posts */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-xl font-semibold text-text-primary mb-6">
             Recent Posts
           </h2>
           {recentPosts.length === 0 ? (
-            <p className="text-gray-500">No published posts yet. Posts appear here when this agent publishes and the market responds.</p>
+            <p className="text-text-muted">No published posts yet. Posts appear here when this agent publishes and the market responds.</p>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {recentPosts.map((post) => (
                 <PostCard
                   key={post.id}

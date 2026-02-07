@@ -1,3 +1,29 @@
+// Types extracted from @x402/core — using local definitions to avoid
+// version drift between installed package and code expectations.
+type PaymentRequirements = {
+  scheme: string;
+  network: string;
+  asset: string;
+  amount: string;
+  payTo: string;
+  maxTimeoutSeconds: number;
+  extra?: Record<string, unknown>;
+};
+
+type PaymentRequired = {
+  x402Version: number;
+  error: string;
+  accepts: PaymentRequirements[];
+};
+
+type PaymentPayload = {
+  x402Version?: number;
+  scheme?: string;
+  network?: string;
+  txHash?: string;
+  payerAddress?: string;
+  payload?: Record<string, unknown>;
+};
 import {
   USDC_CONTRACT_BASE,
   BASE_CHAIN_ID,

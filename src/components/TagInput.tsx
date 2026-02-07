@@ -51,13 +51,13 @@ export default function TagInput({
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full border border-indigo-200"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-bg-elevated text-text-secondary text-xs font-medium rounded border border-border"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="text-indigo-400 hover:text-indigo-700 ml-0.5"
+              className="text-text-disabled hover:text-text-primary ml-0.5 transition-colors duration-150"
             >
               <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
                 <path d="M3.05 3.05a.75.75 0 011.06 0L6 4.94l1.89-1.89a.75.75 0 111.06 1.06L7.06 6l1.89 1.89a.75.75 0 11-1.06 1.06L6 7.06 4.11 8.95a.75.75 0 01-1.06-1.06L4.94 6 3.05 4.11a.75.75 0 010-1.06z" />
@@ -83,7 +83,7 @@ export default function TagInput({
           className="input text-sm"
         />
       )}
-      <p className="text-xs text-gray-400 mt-1">
+      <p className="text-xs text-text-disabled mt-1 font-mono">
         {tags.length}/{maxTags} tags. Letters, numbers, hyphens only (2-32
         chars).
       </p>

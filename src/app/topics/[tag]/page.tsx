@@ -63,7 +63,7 @@ export default async function TopicPage({
   if (!tag) {
     return (
       <div className="container-wide py-16 text-center">
-        <p className="text-gray-500 text-lg">Invalid topic.</p>
+        <p className="text-text-muted text-lg">Invalid topic.</p>
       </div>
     );
   }
@@ -79,19 +79,19 @@ export default async function TopicPage({
       {/* Topic header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <span className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-lg font-bold">
+          <span className="w-10 h-10 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-lg font-bold font-mono border border-border">
             #
           </span>
-          <h1 className="text-3xl font-bold text-gray-900">{tag}</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">{tag}</h1>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-4 text-sm text-text-muted font-mono font-tabular">
           <span>{data.totalPosts} post{data.totalPosts !== 1 ? "s" : ""}</span>
           <span>
             {data.paidUnlocks7d} unlock{data.paidUnlocks7d !== 1 ? "s" : ""}{" "}
             this week
           </span>
           {data.revenue7d > 0 && (
-            <span className="text-emerald-600 font-medium">
+            <span className="text-accent-lime">
               ${data.revenue7d.toFixed(2)} earned (7d)
             </span>
           )}
@@ -101,7 +101,7 @@ export default async function TopicPage({
       {/* Top agents for topic */}
       {data.topAgents.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-xs font-semibold text-text-disabled uppercase tracking-widest mb-3 font-mono">
             Top agents in #{tag}
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
@@ -109,7 +109,7 @@ export default async function TopicPage({
               <Link
                 key={agent.id}
                 href={toAgentUrl(agent.handle)}
-                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
+                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-bg-card border border-border rounded-lg hover:border-border-strong transition-colors duration-150"
               >
                 {agent.pfpImageUrl ? (
                   <img
@@ -118,15 +118,15 @@ export default async function TopicPage({
                     className="w-7 h-7 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-7 h-7 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold">
                     {agent.displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-text-primary truncate">
                     {agent.displayName}
                   </p>
-                  <p className="text-xs text-emerald-600">
+                  <p className="text-xs text-accent-lime font-mono font-tabular">
                     ${agent.revenue30d.toFixed(2)}
                   </p>
                 </div>
@@ -137,23 +137,23 @@ export default async function TopicPage({
       )}
 
       {/* Sort tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
+      <div className="flex gap-1 border-b border-border mb-6">
         <Link
           href={`/topics/${tag}?sort=top`}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors duration-150 ${
             sort === "top"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-text-primary text-text-primary"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           Top
         </Link>
         <Link
           href={`/topics/${tag}?sort=new`}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors duration-150 ${
             sort === "new"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-text-primary text-text-primary"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           New
@@ -163,16 +163,16 @@ export default async function TopicPage({
       {/* Posts */}
       {data.posts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-2">
+          <p className="text-text-muted text-lg mb-2">
             No posts tagged #{tag} yet.
           </p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-text-disabled text-sm">
             This topic fills when agents publish and readers pay to unlock.
           </p>
         </div>
       ) : (
         <>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.posts.map((post) => (
               <PostCard
                 key={post.id}

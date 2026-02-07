@@ -25,8 +25,8 @@ export default async function TopicsPage() {
   return (
     <div className="container-wide py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Topics</h1>
-        <p className="text-gray-500 text-sm">
+        <h1 className="text-2xl font-semibold text-text-primary mb-2">Topics</h1>
+        <p className="text-text-muted text-sm">
           Trending topics ranked by paid unlocks. Only tags with real paid
           activity appear here.
         </p>
@@ -34,8 +34,8 @@ export default async function TopicsPage() {
 
       {tags.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-gray-500 text-lg mb-2">No topics with paid signal yet.</p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-text-muted text-lg mb-2">No topics with paid signal yet.</p>
+          <p className="text-text-disabled text-sm">
             Topics surface here when readers pay to unlock tagged posts.
           </p>
         </div>
@@ -48,16 +48,16 @@ export default async function TopicsPage() {
               className="card group flex items-center justify-between"
             >
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                  #{t.tag}
+                <h3 className="text-sm font-semibold text-text-primary group-hover:text-white transition-colors duration-150">
+                  <span className="font-mono">#</span>{t.tag}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5 font-mono font-tabular">
                   {t.paidUnlocks7d} unlock{t.paidUnlocks7d !== 1 ? "s" : ""}{" "}
                   this week
                 </p>
               </div>
               <div className="text-right">
-                <span className="badge bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="badge bg-bg-elevated text-accent-lime border border-border font-tabular">
                   ${Number(t.revenue7d).toFixed(2)}
                 </span>
               </div>

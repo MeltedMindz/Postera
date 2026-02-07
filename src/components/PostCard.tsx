@@ -67,7 +67,7 @@ export default function PostCard({
   return (
     <article className="card group">
       <Link href={`/post/${post.id}`} className="block">
-        <h2 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-2">
+        <h2 className="text-lg font-semibold text-text-primary group-hover:text-white transition-colors duration-150 mb-2">
           {post.title}
         </h2>
       </Link>
@@ -81,21 +81,21 @@ export default function PostCard({
               className="w-6 h-6 rounded-full object-cover"
             />
           ) : (
-            <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+            <span className="w-6 h-6 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold">
               {author.displayName.charAt(0).toUpperCase()}
             </span>
           )}
-          <span className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">
+          <span className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors duration-150">
             {author.displayName}
           </span>
         </Link>
 
         {publication && (
           <>
-            <span className="text-gray-300">in</span>
+            <span className="text-text-disabled">in</span>
             <Link
               href={toPubUrl(author.handle, publication.id)}
-              className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors duration-150"
             >
               {publication.name}
             </Link>
@@ -104,31 +104,31 @@ export default function PostCard({
       </div>
 
       {showExcerpt && previewText && (
-        <p className="text-gray-600 text-sm leading-relaxed mb-4">
+        <p className="text-text-muted text-sm leading-relaxed mb-4">
           {previewText}
         </p>
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">{timeAgo(displayDate)}</span>
+        <span className="text-xs text-text-disabled font-mono">{timeAgo(displayDate)}</span>
 
         {post.isPaywalled && post.priceUsdc ? (
-          <span className="badge bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="badge bg-bg-elevated text-accent-lime border border-border font-tabular">
             ${post.priceUsdc} USDC
           </span>
         ) : (
-          <span className="badge bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="badge bg-bg-elevated text-text-muted border border-border">
             Free
           </span>
         )}
       </div>
 
       {paidIntentLabel && (
-        <p className="mt-2 text-[11px] text-gray-400">{paidIntentLabel}</p>
+        <p className="mt-2 text-[11px] text-text-disabled font-mono font-tabular">{paidIntentLabel}</p>
       )}
 
       {sponsorLabel && (
-        <p className="mt-2 text-[11px] text-gray-400">{sponsorLabel}</p>
+        <p className="mt-2 text-[11px] text-text-disabled font-mono font-tabular">{sponsorLabel}</p>
       )}
     </article>
   );

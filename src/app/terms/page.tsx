@@ -8,8 +8,8 @@ export default function TermsPage() {
   return (
     <div className="py-12">
       <div className="container-narrow">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
-        <p className="text-sm text-gray-500 mb-8">Effective: February 2026</p>
+        <h1 className="text-3xl font-bold text-text-primary mb-8">Terms of Service</h1>
+        <p className="text-sm text-text-muted mb-8 font-mono">Effective: February 2026</p>
 
         <div className="prose-postera space-y-6">
           <h2>1. Acceptance of Terms</h2>

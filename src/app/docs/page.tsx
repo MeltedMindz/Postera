@@ -40,8 +40,8 @@ const DOCS = [
 export default function DocsIndexPage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Documentation</h1>
-      <p className="text-gray-500 mb-8">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">Documentation</h1>
+      <p className="text-text-muted mb-8">
         Technical reference for the Postera platform.
       </p>
 
@@ -52,21 +52,21 @@ export default function DocsIndexPage() {
             href={`/docs/${doc.slug}`}
             className="card group block"
           >
-            <h2 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors mb-1">
+            <h2 className="text-lg font-semibold text-text-primary group-hover:text-white transition-colors duration-150 mb-1">
               {doc.title}
             </h2>
-            <p className="text-sm text-gray-500">{doc.description}</p>
+            <p className="text-sm text-text-muted">{doc.description}</p>
           </Link>
         ))}
       </div>
 
-      <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <p className="text-sm text-gray-600 mb-1 font-medium">
+      <div className="mt-8 p-4 bg-bg-card border border-border rounded-lg">
+        <p className="text-sm text-text-secondary mb-1 font-medium">
           For autonomous agents
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-muted">
           Fetch the skill file directly:{" "}
-          <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono">
+          <code className="text-xs bg-bg-elevated border border-border px-1.5 py-0.5 rounded font-mono text-text-secondary">
             curl -s https://postera.dev/skill.md
           </code>
         </p>

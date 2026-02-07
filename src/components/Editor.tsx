@@ -91,27 +91,27 @@ export default function Editor({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Post title..."
-        className="w-full text-3xl font-bold text-gray-900 border-0 border-b border-gray-200 pb-3 mb-6 focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-300"
+        className="w-full text-3xl font-bold text-text-primary bg-transparent border-0 border-b border-border pb-3 mb-6 focus:outline-none focus:border-border-active transition-colors duration-150 placeholder:text-text-disabled"
       />
 
       {/* Tabs for mobile, side-by-side on desktop */}
-      <div className="md:hidden flex border-b border-gray-200 mb-4">
+      <div className="md:hidden flex border-b border-border mb-4">
         <button
           onClick={() => setActiveTab("write")}
-          className={`flex-1 py-2 text-sm font-medium text-center border-b-2 transition-colors ${
+          className={`flex-1 py-2 text-sm font-medium text-center border-b-2 transition-colors duration-150 ${
             activeTab === "write"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-text-primary text-text-primary"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           Write
         </button>
         <button
           onClick={() => setActiveTab("preview")}
-          className={`flex-1 py-2 text-sm font-medium text-center border-b-2 transition-colors ${
+          className={`flex-1 py-2 text-sm font-medium text-center border-b-2 transition-colors duration-150 ${
             activeTab === "preview"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-text-primary text-text-primary"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           Preview
@@ -121,7 +121,7 @@ export default function Editor({
       <div className="md:grid md:grid-cols-2 md:gap-6 mb-6">
         {/* Write panel */}
         <div className={`${activeTab === "preview" ? "hidden md:block" : ""}`}>
-          <label className="hidden md:block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+          <label className="hidden md:block text-xs font-medium text-text-disabled uppercase tracking-widest mb-2 font-mono">
             Markdown
           </label>
           <textarea
@@ -134,17 +134,17 @@ export default function Editor({
 
         {/* Preview panel */}
         <div className={`${activeTab === "write" ? "hidden md:block" : ""}`}>
-          <label className="hidden md:block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+          <label className="hidden md:block text-xs font-medium text-text-disabled uppercase tracking-widest mb-2 font-mono">
             Preview
           </label>
-          <div className="border border-gray-200 rounded-lg p-4 h-96 overflow-y-auto bg-white">
+          <div className="border border-border rounded-lg p-4 h-96 overflow-y-auto bg-bg-card">
             {bodyMarkdown.trim() ? (
               <div
                 className="prose-postera"
                 dangerouslySetInnerHTML={{ __html: renderedHtml }}
               />
             ) : (
-              <p className="text-gray-400 text-sm italic">
+              <p className="text-text-disabled text-sm italic">
                 Preview will appear here...
               </p>
             )}
@@ -153,26 +153,26 @@ export default function Editor({
       </div>
 
       {/* Tags */}
-      <div className="border border-gray-200 rounded-lg p-5 mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+      <div className="border border-border rounded-lg p-5 mb-6 bg-bg-card">
+        <label className="block text-sm font-medium text-text-secondary mb-3">
           Tags
         </label>
         <TagInput tags={tags} onChange={setTags} maxTags={8} />
       </div>
 
       {/* Paywall settings */}
-      <div className="border border-gray-200 rounded-lg p-5 mb-6">
+      <div className="border border-border rounded-lg p-5 mb-6 bg-bg-card">
         <div className="flex items-center gap-3 mb-4">
           <input
             type="checkbox"
             id="paywall-toggle"
             checked={isPaywalled}
             onChange={(e) => setIsPaywalled(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="w-4 h-4 rounded border-border-strong text-text-primary focus:ring-border-active bg-bg-elevated"
           />
           <label
             htmlFor="paywall-toggle"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-text-secondary"
           >
             Enable paywall
           </label>
@@ -181,7 +181,7 @@ export default function Editor({
         {isPaywalled && (
           <div className="grid gap-4 sm:grid-cols-2 pl-7">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-text-muted mb-1 font-mono">
                 Price (USDC)
               </label>
               <input
@@ -189,11 +189,11 @@ export default function Editor({
                 value={priceUsdc}
                 onChange={(e) => setPriceUsdc(e.target.value)}
                 placeholder="0.50"
-                className="input"
+                className="input font-mono"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-text-muted mb-1 font-mono">
                 Preview characters
               </label>
               <input
@@ -203,7 +203,7 @@ export default function Editor({
                   setPreviewChars(parseInt(e.target.value, 10) || 0)
                 }
                 placeholder="300"
-                className="input"
+                className="input font-mono"
               />
             </div>
           </div>

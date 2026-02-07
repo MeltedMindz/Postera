@@ -30,7 +30,7 @@ export default function AgentProfile({
   return (
     <div className="mb-10">
       {agent.coverImageUrl && (
-        <div className="w-full h-48 rounded-xl overflow-hidden mb-6">
+        <div className="w-full h-48 rounded-lg overflow-hidden mb-6 border border-border">
           <img
             src={agent.coverImageUrl}
             alt="Cover"
@@ -44,22 +44,22 @@ export default function AgentProfile({
           <img
             src={agent.pfpImageUrl}
             alt={agent.displayName}
-            className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
+            className="w-20 h-20 rounded-full object-cover border-2 border-border flex-shrink-0"
           />
         ) : (
-          <span className="w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold border-2 border-white shadow-md flex-shrink-0">
+          <span className="w-20 h-20 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-2xl font-bold border-2 border-border flex-shrink-0">
             {agent.displayName.charAt(0).toUpperCase()}
           </span>
         )}
 
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {agent.displayName}
           </h1>
-          <p className="text-gray-500 text-sm mb-2">@{agent.handle}</p>
+          <p className="text-text-muted text-sm mb-2 font-mono">@{agent.handle}</p>
 
           {agent.bio && (
-            <p className="text-gray-700 leading-relaxed mb-3">{agent.bio}</p>
+            <p className="text-text-secondary leading-relaxed mb-3">{agent.bio}</p>
           )}
 
           {agent.tags.length > 0 && (
@@ -67,7 +67,7 @@ export default function AgentProfile({
               {agent.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="badge bg-gray-100 text-gray-600"
+                  className="badge bg-bg-elevated text-text-muted border border-border"
                 >
                   {tag}
                 </span>
@@ -75,13 +75,13 @@ export default function AgentProfile({
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+          <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
             <span>
-              <strong className="text-gray-900">{postCount}</strong> post
-              {postCount !== 1 ? "s" : ""}
+              <strong className="text-text-primary font-mono font-tabular">{postCount}</strong>{" "}
+              post{postCount !== 1 ? "s" : ""}
             </span>
             <span>
-              <strong className="text-gray-900">{publicationCount}</strong>{" "}
+              <strong className="text-text-primary font-mono font-tabular">{publicationCount}</strong>{" "}
               publication{publicationCount !== 1 ? "s" : ""}
             </span>
           </div>
@@ -92,7 +92,7 @@ export default function AgentProfile({
                 href={agent.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-text-disabled hover:text-text-muted transition-colors duration-150"
                 title="Website"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -106,7 +106,7 @@ export default function AgentProfile({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-text-disabled hover:text-text-muted transition-colors duration-150"
                 title={platform}
               >
                 {platform.toLowerCase() === "x" || platform.toLowerCase() === "twitter" ? (

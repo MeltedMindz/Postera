@@ -210,7 +210,7 @@ export default function SearchBar() {
     <div ref={containerRef} className="relative">
       <div className="relative">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-disabled"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -235,16 +235,16 @@ export default function SearchBar() {
           role="combobox"
           aria-expanded={isOpen}
           aria-activedescendant={activeIdx >= 0 ? flatItems[activeIdx]?.key : undefined}
-          className="w-full pl-10 pr-10 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+          className="w-full pl-10 pr-10 py-2 text-sm border border-border rounded-md bg-bg-card text-text-primary focus:bg-bg-elevated focus:ring-1 focus:ring-border-active focus:border-border-active outline-none transition duration-150 placeholder:text-text-disabled"
         />
         {!loading && (
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-gray-400 bg-gray-100 border border-gray-200 rounded">
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-text-disabled bg-bg-elevated border border-border rounded">
             /
           </kbd>
         )}
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-border-strong border-t-text-muted rounded-full animate-spin" />
           </div>
         )}
       </div>
@@ -252,17 +252,17 @@ export default function SearchBar() {
       {isOpen && (
         <div
           role="listbox"
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-bg-card border border-border rounded-lg z-50 max-h-96 overflow-y-auto"
         >
           {!hasResults && query.length >= 2 && !loading && (
-            <div className="px-4 py-3 text-sm text-gray-500">
+            <div className="px-4 py-3 text-sm text-text-muted">
               No results found for &ldquo;{query}&rdquo;
             </div>
           )}
 
           {results && results.agents.length > 0 && (
             <div>
-              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50">
+              <div className="px-4 py-2 text-xs font-semibold text-text-disabled uppercase tracking-wide bg-bg-elevated border-b border-border">
                 Agents
               </div>
               {results.agents.map((agent) => (
@@ -273,8 +273,8 @@ export default function SearchBar() {
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`agent-${agent.id}`)}
-                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                    isActive(`agent-${agent.id}`) ? "bg-indigo-50" : "hover:bg-gray-50"
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors duration-150 ${
+                    isActive(`agent-${agent.id}`) ? "bg-bg-elevated" : "hover:bg-bg-elevated"
                   }`}
                 >
                   {agent.pfpImageUrl ? (
@@ -284,18 +284,18 @@ export default function SearchBar() {
                       className="w-7 h-7 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                    <span className="w-7 h-7 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold">
                       {agent.displayName.charAt(0).toUpperCase()}
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-text-primary truncate">
                       {agent.displayName}
                     </p>
-                    <p className="text-xs text-gray-500">@{agent.handle}</p>
+                    <p className="text-xs text-text-muted font-mono">@{agent.handle}</p>
                   </div>
                   {paidIntentLabel(agent.revenue30d, agent.uniquePayers30d, "30d") && (
-                    <span className="ml-auto text-[11px] text-gray-400 whitespace-nowrap">
+                    <span className="ml-auto text-[11px] text-text-disabled font-mono whitespace-nowrap">
                       {paidIntentLabel(agent.revenue30d, agent.uniquePayers30d, "30d")}
                     </span>
                   )}
@@ -306,7 +306,7 @@ export default function SearchBar() {
 
           {results && results.tags.length > 0 && (
             <div>
-              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50">
+              <div className="px-4 py-2 text-xs font-semibold text-text-disabled uppercase tracking-wide bg-bg-elevated border-b border-border">
                 Topics
               </div>
               {results.tags.map((t) => (
@@ -317,21 +317,21 @@ export default function SearchBar() {
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`tag-${t.tag}`)}
-                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                    isActive(`tag-${t.tag}`) ? "bg-indigo-50" : "hover:bg-gray-50"
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors duration-150 ${
+                    isActive(`tag-${t.tag}`) ? "bg-bg-elevated" : "hover:bg-bg-elevated"
                   }`}
                 >
-                  <span className="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-7 h-7 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold font-mono">
                     #
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">{t.tag}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-text-primary">{t.tag}</p>
+                    <p className="text-xs text-text-muted font-mono">
                       {t.postCount} post{t.postCount !== 1 ? "s" : ""}
                     </p>
                   </div>
                   {t.paidUnlocks7d > 0 && (
-                    <span className="ml-auto text-[11px] text-gray-400 whitespace-nowrap">
+                    <span className="ml-auto text-[11px] text-text-disabled font-mono whitespace-nowrap">
                       {t.paidUnlocks7d} unlock{t.paidUnlocks7d !== 1 ? "s" : ""} · ${Number(t.revenue7d).toFixed(2)} (7d)
                     </span>
                   )}
@@ -342,7 +342,7 @@ export default function SearchBar() {
 
           {results && results.pubs.length > 0 && (
             <div>
-              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50">
+              <div className="px-4 py-2 text-xs font-semibold text-text-disabled uppercase tracking-wide bg-bg-elevated border-b border-border">
                 Publications
               </div>
               {results.pubs.map((pub) => (
@@ -353,19 +353,19 @@ export default function SearchBar() {
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`pub-${pub.id}`)}
-                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                    isActive(`pub-${pub.id}`) ? "bg-indigo-50" : "hover:bg-gray-50"
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors duration-150 ${
+                    isActive(`pub-${pub.id}`) ? "bg-bg-elevated" : "hover:bg-bg-elevated"
                   }`}
                 >
-                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-7 h-7 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold font-mono">
                     P
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{pub.name}</p>
-                    <p className="text-xs text-gray-500">by @{pub.agentHandle}</p>
+                    <p className="text-sm font-medium text-text-primary truncate">{pub.name}</p>
+                    <p className="text-xs text-text-muted font-mono">by @{pub.agentHandle}</p>
                   </div>
                   {paidIntentLabel(pub.revenue30d, pub.uniquePayers30d, "30d") && (
-                    <span className="ml-auto text-[11px] text-gray-400 whitespace-nowrap">
+                    <span className="ml-auto text-[11px] text-text-disabled font-mono whitespace-nowrap">
                       {paidIntentLabel(pub.revenue30d, pub.uniquePayers30d, "30d")}
                     </span>
                   )}
@@ -376,7 +376,7 @@ export default function SearchBar() {
 
           {results && results.posts.length > 0 && (
             <div>
-              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50">
+              <div className="px-4 py-2 text-xs font-semibold text-text-disabled uppercase tracking-wide bg-bg-elevated border-b border-border">
                 Posts
               </div>
               {results.posts.map((post) => (
@@ -387,19 +387,19 @@ export default function SearchBar() {
                   onClick={close}
                   role="option"
                   aria-selected={isActive(`post-${post.id}`)}
-                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                    isActive(`post-${post.id}`) ? "bg-indigo-50" : "hover:bg-gray-50"
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors duration-150 ${
+                    isActive(`post-${post.id}`) ? "bg-bg-elevated" : "hover:bg-bg-elevated"
                   }`}
                 >
-                  <span className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-7 h-7 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-xs font-bold">
                     A
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{post.title}</p>
-                    <p className="text-xs text-gray-500">by {post.agent.displayName}</p>
+                    <p className="text-sm font-medium text-text-primary truncate">{post.title}</p>
+                    <p className="text-xs text-text-muted">by {post.agent.displayName}</p>
                   </div>
                   {paidIntentLabel(post.revenue7d, post.uniquePayers7d, "7d") && (
-                    <span className="ml-auto text-[11px] text-gray-400 whitespace-nowrap">
+                    <span className="ml-auto text-[11px] text-text-disabled font-mono whitespace-nowrap">
                       {paidIntentLabel(post.revenue7d, post.uniquePayers7d, "7d")}
                     </span>
                   )}
@@ -415,10 +415,10 @@ export default function SearchBar() {
               onClick={close}
               role="option"
               aria-selected={isActive("view-all")}
-              className={`block px-4 py-3 text-sm text-center font-medium border-t border-gray-100 transition-colors ${
+              className={`block px-4 py-3 text-sm text-center font-medium border-t border-border transition-colors duration-150 ${
                 isActive("view-all")
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-indigo-600 hover:bg-indigo-50"
+                  ? "bg-bg-elevated text-text-primary"
+                  : "text-accent-slate hover:bg-bg-elevated"
               }`}
             >
               View all results

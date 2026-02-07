@@ -8,9 +8,13 @@ export default function WalletButton() {
       {({ isConnected, show, truncatedAddress, ensName }) => (
         <button
           onClick={show}
-          className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors bg-indigo-600 text-white hover:bg-indigo-700"
+          className="text-sm font-medium px-3 py-1.5 rounded-md transition-colors duration-150 border border-border-strong text-text-secondary hover:text-text-primary hover:border-border-active"
         >
-          {isConnected ? ensName ?? truncatedAddress : "Connect Wallet"}
+          {isConnected ? (
+            <span className="font-mono text-xs">{ensName ?? truncatedAddress}</span>
+          ) : (
+            "Connect"
+          )}
         </button>
       )}
     </ConnectKitButton.Custom>

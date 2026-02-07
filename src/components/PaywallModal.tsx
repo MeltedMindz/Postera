@@ -180,16 +180,19 @@ export default function PaywallModal({
 
   return (
     <div className="relative mt-8">
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center max-w-lg mx-auto">
+      <div className="bg-bg-card border border-border rounded-lg p-8 text-center max-w-lg mx-auto">
         {displayStep === "initial" && (
           <>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <p className="text-xs text-text-disabled uppercase tracking-widest font-mono mb-4">
+              PREMIUM CONTENT
+            </p>
+            <h3 className="text-xl font-semibold text-text-primary mb-2">
               Continue reading
             </h3>
-            <p className="text-gray-600 mb-1">This post is paywalled.</p>
-            <div className="text-3xl font-bold text-gray-900 my-4">
+            <p className="text-text-muted text-sm mb-1">This post is paywalled.</p>
+            <div className="text-3xl font-bold text-text-primary my-6 font-mono font-tabular">
               ${priceUsdc}{" "}
-              <span className="text-lg font-normal text-gray-500">USDC</span>
+              <span className="text-lg font-normal text-text-muted">USDC</span>
             </div>
             <button
               onClick={handleUnlockClick}
@@ -197,20 +200,20 @@ export default function PaywallModal({
             >
               Unlock this post
             </button>
-            <p className="text-xs text-gray-400">Pay with USDC on Base</p>
-            <div className="mt-3 inline-flex items-center gap-1.5 badge bg-blue-50 text-blue-700 border border-blue-200">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              Base Network
+            <p className="text-xs text-text-disabled font-mono">Pay with USDC on Base</p>
+            <div className="mt-3 inline-flex items-center gap-1.5 badge bg-bg-elevated text-text-muted border border-border">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-slate"></span>
+              <span className="font-mono text-[11px]">Base Network</span>
             </div>
           </>
         )}
 
         {displayStep === "not_connected" && (
           <>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-text-primary mb-2">
               Connect your wallet
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-text-muted text-sm mb-4">
               You need a wallet with USDC on Base to unlock this post.
             </p>
             <button
@@ -221,7 +224,7 @@ export default function PaywallModal({
             </button>
             <button
               onClick={() => setOuterStep("initial")}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors duration-150"
             >
               Back
             </button>
@@ -230,10 +233,10 @@ export default function PaywallModal({
 
         {displayStep === "wrong_chain" && (
           <>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-text-primary mb-2">
               Switch to Base
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-text-muted text-sm mb-4">
               Please switch your wallet to the Base network to continue.
             </p>
             <button
@@ -244,7 +247,7 @@ export default function PaywallModal({
             </button>
             <button
               onClick={() => setOuterStep("initial")}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors duration-150"
             >
               Back
             </button>
@@ -254,10 +257,10 @@ export default function PaywallModal({
         {(displayStep === "fetching" || displayStep === "checking_allowance") && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Preparing payment...
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Checking your USDC allowance.
             </p>
           </>
@@ -266,12 +269,12 @@ export default function PaywallModal({
         {displayStep === "approving" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Step 1/2: Approve USDC
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Approve the splitter contract to spend{" "}
-              <strong>${priceUsdc} USDC</strong> in your wallet.
+              <strong className="text-text-primary font-mono">${priceUsdc} USDC</strong> in your wallet.
             </p>
           </>
         )}
@@ -279,10 +282,10 @@ export default function PaywallModal({
         {displayStep === "approve_confirming" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Step 1/2: Confirming approval...
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Waiting for approval transaction to confirm on Base.
             </p>
           </>
@@ -291,12 +294,12 @@ export default function PaywallModal({
         {displayStep === "sending" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               {payment.approveSkipped ? "Confirm purchase" : "Step 2/2: Confirm purchase"}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Confirm the payment of{" "}
-              <strong>${priceUsdc} USDC</strong> in your wallet.
+              <strong className="text-text-primary font-mono">${priceUsdc} USDC</strong> in your wallet.
             </p>
           </>
         )}
@@ -304,10 +307,10 @@ export default function PaywallModal({
         {displayStep === "confirming" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Confirming on Base...
             </h3>
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-sm text-text-muted mb-2">
               Waiting for your transaction to be confirmed.
             </p>
             {payment.txHash && (
@@ -315,7 +318,7 @@ export default function PaywallModal({
                 href={`https://basescan.org/tx/${payment.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-indigo-600 hover:underline font-mono"
+                className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150 font-mono"
               >
                 {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
               </a>
@@ -326,10 +329,10 @@ export default function PaywallModal({
         {displayStep === "verifying" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Submitting payment proof...
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Sending transaction to Postera for verification.
             </p>
           </>
@@ -338,10 +341,10 @@ export default function PaywallModal({
         {displayStep === "pending_confirmation" && (
           <>
             <Spinner />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Verifying on-chain...
             </h3>
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-sm text-text-muted mb-2">
               Confirming your payment on Base. This usually takes a few seconds.
             </p>
             {payment.txHash && (
@@ -349,7 +352,7 @@ export default function PaywallModal({
                 href={`https://basescan.org/tx/${payment.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-indigo-600 hover:underline font-mono"
+                className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150 font-mono"
               >
                 {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
               </a>
@@ -359,9 +362,9 @@ export default function PaywallModal({
 
         {displayStep === "error" && (
           <>
-            <div className="w-12 h-12 rounded-full bg-red-100 mx-auto flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-bg-elevated mx-auto flex items-center justify-center mb-4 border border-border">
               <svg
-                className="w-6 h-6 text-red-600"
+                className="w-6 h-6 text-accent-red"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -374,10 +377,10 @@ export default function PaywallModal({
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Something went wrong
             </h3>
-            <p className="text-sm text-red-600 mb-4">{errorMsg}</p>
+            <p className="text-sm text-accent-red mb-4">{errorMsg}</p>
             <button onClick={handleRetry} className="btn-secondary w-full">
               Try Again
             </button>
@@ -391,9 +394,9 @@ export default function PaywallModal({
 function Spinner() {
   return (
     <div className="mb-4">
-      <div className="w-12 h-12 rounded-full bg-indigo-100 mx-auto flex items-center justify-center">
+      <div className="w-12 h-12 rounded-full bg-bg-elevated mx-auto flex items-center justify-center border border-border">
         <svg
-          className="w-6 h-6 text-indigo-600 animate-spin"
+          className="w-6 h-6 text-text-muted animate-spin"
           fill="none"
           viewBox="0 0 24 24"
         >

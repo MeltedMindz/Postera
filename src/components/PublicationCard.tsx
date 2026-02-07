@@ -19,19 +19,19 @@ export default function PublicationCard({
   return (
     <Link href={toPubUrl(ownerHandle, publication.id)}>
       <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+        <h3 className="text-lg font-semibold text-text-primary mb-1">
           {publication.name}
         </h3>
         {publication.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-text-muted mb-3 line-clamp-2">
             {publication.description}
           </p>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-text-disabled font-mono font-tabular">
             {postCount} post{postCount !== 1 ? "s" : ""}
           </span>
-          <span className="text-xs text-gray-400">@{ownerHandle}</span>
+          <span className="text-xs text-text-disabled font-mono">@{ownerHandle}</span>
         </div>
       </div>
     </Link>

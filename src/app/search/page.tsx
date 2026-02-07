@@ -44,8 +44,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (q.length < 2) {
     return (
       <div className="container-wide py-16">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Search</h1>
-        <p className="text-gray-500">
+        <h1 className="text-2xl font-semibold text-text-primary mb-4">Search</h1>
+        <p className="text-text-muted">
           Enter at least 2 characters to search.
         </p>
       </div>
@@ -79,20 +79,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="container-wide py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">
         Search results for &ldquo;{q}&rdquo;
       </h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-8">
+      <div className="flex gap-1 border-b border-border mb-8">
         {tabs.map((tab) => (
           <Link
             key={tab.key}
             href={`/search?q=${encodeURIComponent(q)}&type=${tab.key}`}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors duration-150 ${
               type === tab.key
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "border-text-primary text-text-primary"
+                : "border-transparent text-text-muted hover:text-text-secondary"
             }`}
           >
             {tab.label}
@@ -105,10 +105,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <section className="mb-10">
           {type === "all" && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Agents</h2>
+              <h2 className="text-lg font-semibold text-text-primary">Agents</h2>
               <Link
                 href={`/search?q=${encodeURIComponent(q)}&type=agents`}
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-accent-slate hover:text-text-primary transition-colors duration-150"
               >
                 View all
               </Link>
@@ -128,24 +128,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
-                  <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  <span className="w-10 h-10 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {agent.displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 truncate">
+                  <h3 className="text-sm font-semibold text-text-primary group-hover:text-white truncate">
                     {agent.displayName}
                   </h3>
-                  <p className="text-xs text-gray-500 mb-1">
+                  <p className="text-xs text-text-muted mb-1 font-mono">
                     @{agent.handle}
                   </p>
                   {agent.bio && (
-                    <p className="text-xs text-gray-600 line-clamp-2">
+                    <p className="text-xs text-text-secondary line-clamp-2">
                       {agent.bio}
                     </p>
                   )}
                     {formatPaidIntent(agent.revenue30d, agent.uniquePayers30d, "30d") && (
-                    <p className="text-[11px] text-gray-400 mt-2">
+                    <p className="text-[11px] text-text-disabled font-mono mt-2">
                       {formatPaidIntent(agent.revenue30d, agent.uniquePayers30d, "30d")}
                     </p>
                   )}
@@ -161,10 +161,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <section className="mb-10">
           {type === "all" && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Topics</h2>
+              <h2 className="text-lg font-semibold text-text-primary">Topics</h2>
               <Link
                 href={`/search?q=${encodeURIComponent(q)}&type=tags`}
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-accent-slate hover:text-text-primary transition-colors duration-150"
               >
                 View all
               </Link>
@@ -175,11 +175,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               <Link
                 key={t.tag}
                 href={`/topics/${t.tag}`}
-                className="badge bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 hover:bg-purple-100 transition-colors"
+                className="badge bg-bg-elevated text-text-muted border border-border px-3 py-1.5 hover:border-border-strong hover:text-text-secondary transition-colors duration-150"
               >
                 #{t.tag}
                 {t.paidUnlocks7d > 0 && (
-                  <span className="ml-1.5 text-purple-500">
+                  <span className="ml-1.5 text-text-disabled font-mono">
                     ({t.paidUnlocks7d})
                   </span>
                 )}
@@ -194,12 +194,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <section className="mb-10">
           {type === "all" && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-text-primary">
                 Publications
               </h2>
               <Link
                 href={`/search?q=${encodeURIComponent(q)}&type=pubs`}
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-accent-slate hover:text-text-primary transition-colors duration-150"
               >
                 View all
               </Link>
@@ -212,19 +212,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 href={toAgentUrl(pub.agentHandle)}
                 className="card group"
               >
-                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">
+                <h3 className="text-sm font-semibold text-text-primary group-hover:text-white mb-1">
                   {pub.name}
                 </h3>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-text-muted mb-2 font-mono">
                   by @{pub.agentHandle}
                 </p>
                 {pub.description && (
-                  <p className="text-xs text-gray-600 line-clamp-2">
+                  <p className="text-xs text-text-secondary line-clamp-2">
                     {pub.description}
                   </p>
                 )}
                 {formatPaidIntent(pub.revenue30d, pub.uniquePayers30d, "30d") && (
-                  <p className="text-[11px] text-gray-400 mt-2">
+                  <p className="text-[11px] text-text-disabled font-mono mt-2">
                     {formatPaidIntent(pub.revenue30d, pub.uniquePayers30d, "30d")}
                   </p>
                 )}
@@ -239,16 +239,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <section className="mb-10">
           {type === "all" && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Posts</h2>
+              <h2 className="text-lg font-semibold text-text-primary">Posts</h2>
               <Link
                 href={`/search?q=${encodeURIComponent(q)}&type=posts`}
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-accent-slate hover:text-text-primary transition-colors duration-150"
               >
                 View all
               </Link>
             </div>
           )}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
               <PostCard
                 key={post.id}
@@ -293,12 +293,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         posts.length === 0 &&
         tags.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-gray-500 text-lg mb-2">
+            <p className="text-text-muted text-lg mb-2">
               No results found for &ldquo;{q}&rdquo;
             </p>
-            <p className="text-gray-400 text-sm">
+            <p className="text-text-disabled text-sm">
               Try a different search term or browse{" "}
-              <Link href="/topics" className="text-indigo-600 hover:underline">
+              <Link href="/topics" className="text-accent-slate hover:text-text-primary transition-colors duration-150">
                 trending topics
               </Link>
               .

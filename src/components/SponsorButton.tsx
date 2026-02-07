@@ -182,11 +182,11 @@ export default function SponsorButton({
 
   if (displayStep === "success") {
     return (
-      <div className="mt-8 p-6 border border-emerald-200 bg-emerald-50 rounded-lg text-center">
-        <p className="text-emerald-700 font-medium">
-          Thanks for sponsoring this post! ({amount} USDC)
+      <div className="mt-8 p-6 border border-border bg-bg-card rounded-lg text-center">
+        <p className="text-accent-lime font-medium">
+          Thanks for sponsoring this post! (<span className="font-mono font-tabular">{amount} USDC</span>)
         </p>
-        <p className="text-xs text-emerald-600 mt-1">
+        <p className="text-xs text-text-muted mt-1">
           Refresh the page to see updated earnings.
         </p>
         {payment.txHash && (
@@ -194,7 +194,7 @@ export default function SponsorButton({
             href={`https://basescan.org/tx/${payment.txHash}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-emerald-600 hover:underline font-mono mt-2 inline-block"
+            className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150 font-mono mt-2 inline-block"
           >
             {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
           </a>
@@ -211,20 +211,20 @@ export default function SponsorButton({
     displayStep === "idle";
 
   return (
-    <div className="mt-8 p-6 border border-gray-200 rounded-lg">
+    <div className="mt-8 p-6 border border-border bg-bg-card rounded-lg">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">Sponsor this post</h3>
+        <h3 className="text-sm font-semibold text-text-secondary">Sponsor this post</h3>
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-900">{fmtUsdc(totalEarned)} earned</p>
+          <p className="text-sm font-medium text-accent-lime font-mono font-tabular">{fmtUsdc(totalEarned)} earned</p>
           {sponsorEarned > 0 && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-muted font-mono font-tabular">
               {fmtUsdc(sponsorEarned)} from {uniqueSponsors} sponsor
               {uniqueSponsors !== 1 ? "s" : ""}
             </p>
           )}
         </div>
       </div>
-      <p className="text-xs text-gray-500 mb-4">
+      <p className="text-xs text-text-muted mb-4">
         Support this free content. 90% goes to the author, 10% to the protocol.
       </p>
 
@@ -240,10 +240,10 @@ export default function SponsorButton({
                   setCustom("");
                   if (outerStep !== "select") { setOuterStep("select"); payment.reset(); }
                 }}
-                className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-mono font-medium border transition-colors duration-150 ${
                   selected === amt
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:border-indigo-400"
+                    ? "bg-text-primary text-bg border-text-primary"
+                    : "bg-transparent text-text-secondary border-border-strong hover:border-border-active"
                 }`}
               >
                 ${amt}
@@ -254,10 +254,10 @@ export default function SponsorButton({
                 setSelected("custom");
                 if (outerStep !== "select") { setOuterStep("select"); payment.reset(); }
               }}
-              className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors duration-150 ${
                 selected === "custom"
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-indigo-400"
+                  ? "bg-text-primary text-bg border-text-primary"
+                  : "bg-transparent text-text-secondary border-border-strong hover:border-border-active"
               }`}
             >
               Custom
@@ -271,7 +271,7 @@ export default function SponsorButton({
               placeholder="Amount in USDC"
               value={custom}
               onChange={(e) => setCustom(e.target.value.replace(/[^0-9.]/g, ""))}
-              className="w-full px-3 py-2 border border-gray-300 rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="input font-mono mb-4"
             />
           )}
         </>
@@ -281,11 +281,11 @@ export default function SponsorButton({
         <div className="mb-4">
           <button
             onClick={() => setOpen(true)}
-            className="w-full py-2 rounded bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors"
+            className="w-full py-2 rounded-md bg-text-primary text-bg font-medium text-sm hover:bg-white transition-colors duration-150"
           >
             Connect Wallet
           </button>
-          <p className="mt-2 text-xs text-gray-500 text-center">
+          <p className="mt-2 text-xs text-text-muted text-center">
             You need a wallet with USDC on Base to sponsor.
           </p>
         </div>
@@ -295,11 +295,11 @@ export default function SponsorButton({
         <div className="mb-4">
           <button
             onClick={() => switchChain({ chainId: BASE_CHAIN_ID })}
-            className="w-full py-2 rounded bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors"
+            className="w-full py-2 rounded-md bg-text-primary text-bg font-medium text-sm hover:bg-white transition-colors duration-150"
           >
             Switch to Base
           </button>
-          <p className="mt-2 text-xs text-gray-500 text-center">
+          <p className="mt-2 text-xs text-text-muted text-center">
             Please switch to the Base network to continue.
           </p>
         </div>
@@ -308,23 +308,23 @@ export default function SponsorButton({
       {(displayStep === "select" || displayStep === "idle") && amount && parseFloat(amount) > 0 && (
         <button
           onClick={handleSponsorClick}
-          className="w-full py-2 rounded bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors"
+          className="w-full py-2 rounded-md bg-text-primary text-bg font-medium text-sm hover:bg-white transition-colors duration-150"
         >
-          Sponsor {amount} USDC
+          Sponsor <span className="font-mono">{amount} USDC</span>
         </button>
       )}
 
       {displayStep === "fetching" || displayStep === "checking_allowance" ? (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">Preparing payment...</p>
+          <p className="text-sm text-text-muted mt-2">Preparing payment...</p>
         </div>
       ) : null}
 
       {displayStep === "approving" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-text-muted mt-2">
             Step 1/2: Approve USDC spending in your wallet.
           </p>
         </div>
@@ -333,7 +333,7 @@ export default function SponsorButton({
       {displayStep === "approve_confirming" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-text-muted mt-2">
             Step 1/2: Confirming approval on Base...
           </p>
         </div>
@@ -342,11 +342,11 @@ export default function SponsorButton({
       {displayStep === "sending" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-text-muted mt-2">
             {payment.approveSkipped ? (
-              <>Confirm the sponsorship of <strong>${amount} USDC</strong> in your wallet.</>
+              <>Confirm the sponsorship of <strong className="text-text-primary font-mono">${amount} USDC</strong> in your wallet.</>
             ) : (
-              <>Step 2/2: Confirm the sponsorship of <strong>${amount} USDC</strong> in your wallet.</>
+              <>Step 2/2: Confirm the sponsorship of <strong className="text-text-primary font-mono">${amount} USDC</strong> in your wallet.</>
             )}
           </p>
         </div>
@@ -355,13 +355,13 @@ export default function SponsorButton({
       {displayStep === "confirming" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">Confirming on Base...</p>
+          <p className="text-sm text-text-muted mt-2">Confirming on Base...</p>
           {payment.txHash && (
             <a
               href={`https://basescan.org/tx/${payment.txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-indigo-600 hover:underline font-mono"
+              className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150 font-mono"
             >
               {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
             </a>
@@ -372,20 +372,20 @@ export default function SponsorButton({
       {displayStep === "verifying" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">Submitting sponsorship proof...</p>
+          <p className="text-sm text-text-muted mt-2">Submitting sponsorship proof...</p>
         </div>
       )}
 
       {displayStep === "pending_confirmation" && (
         <div className="text-center py-3">
           <Spinner />
-          <p className="text-sm text-gray-500 mt-2">Verifying on-chain...</p>
+          <p className="text-sm text-text-muted mt-2">Verifying on-chain...</p>
           {payment.txHash && (
             <a
               href={`https://basescan.org/tx/${payment.txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-indigo-600 hover:underline font-mono mt-1 inline-block"
+              className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150 font-mono mt-1 inline-block"
             >
               {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
             </a>
@@ -395,8 +395,8 @@ export default function SponsorButton({
 
       {displayStep === "error" && (
         <div className="mt-3">
-          <p className="text-xs text-red-600 mb-2">{errorMsg}</p>
-          <button onClick={handleRetry} className="text-xs text-indigo-600 hover:underline">
+          <p className="text-xs text-accent-red mb-2">{errorMsg}</p>
+          <button onClick={handleRetry} className="text-xs text-accent-slate hover:text-text-primary transition-colors duration-150">
             Try again
           </button>
         </div>
@@ -408,7 +408,7 @@ export default function SponsorButton({
 function Spinner() {
   return (
     <div className="inline-block">
-      <svg className="w-5 h-5 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-text-muted animate-spin" fill="none" viewBox="0 0 24 24">
         <circle
           className="opacity-25"
           cx="12"

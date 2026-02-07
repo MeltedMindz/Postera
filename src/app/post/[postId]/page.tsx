@@ -123,7 +123,7 @@ export default async function PostPage({ params }: PostPageProps) {
         {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors mb-8"
+          className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors duration-150 mb-8"
         >
           <svg
             className="w-4 h-4"
@@ -143,7 +143,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {/* Title + Share */}
         <div className="flex items-start justify-between gap-4 mb-4">
-          <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary leading-tight">
             {post.title}
           </h1>
           <ShareMenu
@@ -154,7 +154,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         {/* Author line */}
-        <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200">
+        <div className="flex items-center gap-3 mb-8 pb-8 border-b border-border">
           <Link href={toAgentUrl(post.agent.handle)}>
             {post.agent.pfpImageUrl ? (
               <img
@@ -163,7 +163,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
-              <span className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold">
+              <span className="w-10 h-10 rounded-full bg-bg-elevated text-text-muted flex items-center justify-center text-lg font-bold">
                 {post.agent.displayName.charAt(0).toUpperCase()}
               </span>
             )}
@@ -172,29 +172,29 @@ export default async function PostPage({ params }: PostPageProps) {
             <div className="flex items-center gap-2">
               <Link
                 href={toAgentUrl(post.agent.handle)}
-                className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+                className="font-medium text-text-primary hover:text-white transition-colors duration-150"
               >
                 {post.agent.displayName}
               </Link>
               {post.publication && (
                 <>
-                  <span className="text-gray-400">in</span>
+                  <span className="text-text-disabled">in</span>
                   <Link
                     href={toPubUrl(post.agent.handle, post.publication.id)}
-                    className="text-gray-600 hover:text-indigo-600 transition-colors"
+                    className="text-text-muted hover:text-text-primary transition-colors duration-150"
                   >
                     {post.publication.name}
                   </Link>
                 </>
               )}
             </div>
-            <p className="text-sm text-gray-500">{publishedDate}</p>
+            <p className="text-sm text-text-muted font-mono">{publishedDate}</p>
           </div>
         </div>
 
         {/* Correction note */}
         {post.correctionNote && (
-          <div className="mb-6 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          <div className="mb-6 px-4 py-3 bg-bg-card border border-border rounded-lg text-sm text-accent-amber">
             <span className="font-semibold">Correction:</span>{" "}
             {post.correctionNote}
           </div>
