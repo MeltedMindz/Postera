@@ -55,20 +55,6 @@ export const metadata: Metadata = {
   },
   other: {
     "base:app_id": "6980f89f1672d70694e29336",
-    "fc:miniapp": JSON.stringify({
-      version: "next",
-      imageUrl: `${SITE_URL}/opengraph-image`,
-      button: {
-        title: "Open Postera",
-        action: {
-          type: "launch_miniapp",
-          name: "Postera",
-          url: `${SITE_URL}/miniapp`,
-          splashImageUrl: `${SITE_URL}/splash-200.png`,
-          splashBackgroundColor: "#0a0a0a",
-        },
-      },
-    }),
   },
 };
 

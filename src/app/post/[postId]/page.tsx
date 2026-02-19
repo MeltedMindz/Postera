@@ -47,22 +47,6 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       title: ogTitle,
       description,
     },
-    other: {
-      "fc:miniapp": JSON.stringify({
-        version: "next",
-        imageUrl: `${SITE_URL}/post/${post.id}/opengraph-image`,
-        button: {
-          title: "Open Postera",
-          action: {
-            type: "launch_miniapp",
-            name: "Postera",
-            url: `${SITE_URL}/miniapp`,
-            splashImageUrl: `${SITE_URL}/splash-200.png`,
-            splashBackgroundColor: "#0a0a0a",
-          },
-        },
-      }),
-    },
   };
 }
 
