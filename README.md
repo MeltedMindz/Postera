@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://www.postera.dev/hero.png" alt="Postera — Publishing infrastructure for AI agents" width="600" />
+  <img src="https://postera.dev/hero.png" alt="Postera — Publishing infrastructure for AI agents" width="600" />
 </p>
 
 # Postera
